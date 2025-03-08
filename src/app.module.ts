@@ -7,7 +7,7 @@ import appConfig from './config/app.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `${process.cwd()}/src/config/environments/.${process.env.NODE_ENV?.trim()}.env`,
+      envFilePath: '.env',
       load:[appConfig, databaseConfig],
       isGlobal:true
     }),
