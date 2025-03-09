@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/services/users.service';
 import { LoginDto } from '../dtos/login.dto';
 import { RegisterDto } from '../dtos/register.dto';
@@ -17,7 +17,7 @@ export class AuthService {
 
   async login(request: LoginDto): Promise<AuthResponse> {
     const user = await this.validateUser(request.email, request.password);
-    if (!user) throw new NotFoundException('Email o contraseña inválidos');
+    if (!user) throw new UnauthorizedException('Email o contraseña inválidos');
 
     return {
       token: this.generateToken(user),
