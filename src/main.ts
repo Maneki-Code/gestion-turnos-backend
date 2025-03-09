@@ -10,6 +10,7 @@ async function bootstrap() {
     transform: true,
     whitelist: true
   }));
+  app.setGlobalPrefix(`api/${configService.get('app.version')}`)
   console.log(`📣 SERVICIO CORRIENDO EN PUERTO: ${configService.get('app.port')}`);
   await app.listen(configService.get('app.port') ?? 3000);
 }
