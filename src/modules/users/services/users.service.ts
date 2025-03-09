@@ -9,7 +9,7 @@ export class UsersService {
 
   async create(request: RegisterDto): Promise<User> {
     if ((await this.findOneByEmail(request.email)) !== null)
-      throw new BadRequestException(`El email '${request.email} ya existe.`);
+      throw new BadRequestException(`El email '${request.email}' ya existe.`);
 
     const createdUser = await this.prismaService.user.create({
       data: {
