@@ -11,7 +11,7 @@ export class UsersController {
   @ApiBearerAuth() 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('MANAGER')
+  /* @Roles('MANAGER') */
   helloFromSecured(){
     return "Hola desde un protegido";
   }
