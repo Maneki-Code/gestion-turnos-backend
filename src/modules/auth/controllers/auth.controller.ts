@@ -1,9 +1,10 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthResponse } from '../dtos/auth.response';
+import { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,8 +20,11 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'Login successfully' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() request: LoginDto): Promise<AuthResponse> {
-    return await this.authService.login(request);
+  async login(
+    @Body() request: LoginDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    await this.authService.login(request, response);
   }
 
   @Post('register')
@@ -34,5 +38,18 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'User email already exists' })
   async register(@Body() request: RegisterDto): Promise<void> {
     await this.authService.register(request);
+  }
+
+  // auth.controller.ts
+  @Post('logout')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Logout',
+    description:
+      'This endpoint allows a user to log out by clearing the JWT cookie.',
+  })
+  @ApiResponse({ status: 200, description: 'Logged out successfully' })
+  async logout(@Res() response: Response): Promise<void> {
+    await this.authService.logout(response);
   }
 }
