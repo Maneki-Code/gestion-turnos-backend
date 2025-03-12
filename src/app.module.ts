@@ -7,6 +7,7 @@ import { PrismaService } from './config/database/prisma/prisma.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { SchedulesModule } from './modules/schedules/schedules.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { SchedulesModule } from './modules/schedules/schedules.module';
     }),
     UsersModule,
     AuthModule,
-    SchedulesModule],
+    SchedulesModule,
+    AppointmentsModule],
   providers: [PrismaService],
   exports: [PrismaService]
 })
