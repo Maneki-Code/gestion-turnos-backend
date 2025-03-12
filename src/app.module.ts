@@ -6,6 +6,7 @@ import appConfig from './config/app.config';
 import { PrismaService } from './config/database/prisma/prisma.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { SchedulesModule } from './modules/schedules/schedules.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
       isGlobal:true
     }),
     UsersModule,
-    AuthModule],
+    AuthModule,
+    SchedulesModule],
   providers: [PrismaService],
   exports: [PrismaService]
 })
