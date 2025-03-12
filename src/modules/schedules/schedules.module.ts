@@ -6,9 +6,10 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 import { ScheduleDaysService } from './services/schedule-days.service';
 import { ScheduleDaysController } from './controllers/schedule-days.controller';
+import { AppointmentsModule } from '../appointments/appointments.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, AppointmentsModule],
   providers: [JwtService, PrismaService, SchedulesService, ScheduleDaysService],
   controllers: [SchedulesController, ScheduleDaysController]
 })

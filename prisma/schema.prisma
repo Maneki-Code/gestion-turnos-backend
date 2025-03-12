@@ -27,13 +27,13 @@ enum AppointmentStatus {
 }
 
 enum EDayOfWeek {
-  Monday
-  Tuesday
-  Wednesday
-  Thursday
-  Friday
-  Saturday
-  Sunday
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
 }
 
 model User {
@@ -73,6 +73,7 @@ model ScheduleDay {
   scheduleId   Int
   schedule     Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   day          EDayOfWeek
+  date      DateTime
   appointments Appointment[] @relation("ScheduleDayAppointments")
 
   createdAt DateTime @default(now())
@@ -84,7 +85,7 @@ model ScheduleDay {
 model Appointment {
   id            Int               @id @default(autoincrement())
   startTime     String
-  description   String
+  description   String?
   status        AppointmentStatus
   customerId    Int?
   customer      Customer?         @relation(fields: [customerId], references: [id])
