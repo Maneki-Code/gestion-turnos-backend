@@ -19,10 +19,21 @@ enum EUserRole {
 }
 
 enum AppointmentStatus {
-  reserved
-  waiting
-  finished
-  absent
+  AVAILABLE
+  RESERVED
+  WAITING
+  FINISHED
+  ABSENT
+}
+
+enum EDayOfWeek {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
 }
 
 model User {
@@ -40,29 +51,48 @@ model User {
 }
 
 model Schedule {
-  id            Int           @id @default(autoincrement())
-  description   String
-  userId        Int
-  user          User          @relation("UserSchedules", fields: [userId], references: [id])
-  appointments Appointment[] @relation("ScheduleAppointments")
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id           Int           @id @default(autoincrement())
+  description  String
+  userId       Int
+  user         User          @relation("UserSchedules", fields: [userId], references: [id])
+  startDate    DateTime
+  endDate      DateTime
+  startTime    String
+  endTime      String
+  slotInterval Int
+  scheduleDays ScheduleDay[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("schedules")
 }
 
+model ScheduleDay {
+  id           Int           @id @default(autoincrement())
+  scheduleId   Int
+  schedule     Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  day          EDayOfWeek
+  appointments Appointment[] @relation("ScheduleDayAppointments")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("schedule_days")
+}
+
 model Appointment {
-  id          Int               @id @default(autoincrement())
-  day         DateTime
-  hour        DateTime
-  description String
-  status      AppointmentStatus
-  customerId  Int
-  customer    Customer          @relation(fields: [customerId], references: [id])
-  scheduleId  Int
-  schedule    Schedule          @relation("ScheduleAppointments", fields: [scheduleId], references: [id])
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id            Int               @id @default(autoincrement())
+  startTime     String
+  description   String
+  status        AppointmentStatus
+  customerId    Int?
+  customer      Customer?         @relation(fields: [customerId], references: [id])
+  scheduleDayId Int
+  scheduleDay   ScheduleDay       @relation("ScheduleDayAppointments", fields: [scheduleDayId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("appointments")
 }
