@@ -1,4 +1,15 @@
-import { IsString, IsEmail, IsDateString, IsArray, ArrayNotEmpty, IsEnum, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsDateString,
+  IsArray,
+  ArrayNotEmpty,
+  IsEnum,
+  IsInt,
+  Min,
+  Max,
+  Matches,
+} from 'class-validator';
 import { EDayOfWeek } from '@prisma/client';
 
 export class ScheduleForCreationDto {
@@ -15,15 +26,21 @@ export class ScheduleForCreationDto {
   endDate: Date;
 
   @IsString()
+  @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
+    message: 'startTime must be in the format HH:mm',
+  })
   startTime: string;
 
   @IsString()
+  @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
+    message: 'endTime must be in the format HH:mm',
+  })
   endTime: string;
 
   @IsInt()
   @Min(1)
   @Max(1440)
-  slotInterval: number; // Intervalo en minutos, debe estar entre 1 y 1440 (24 horas)
+  slotInterval: number;
 
   @IsArray()
   @ArrayNotEmpty()

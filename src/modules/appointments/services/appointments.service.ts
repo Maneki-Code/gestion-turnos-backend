@@ -7,7 +7,6 @@ export class AppointmentsService {
   constructor(private readonly _prisma: PrismaService) {}
 
   async create(scheduleDayId:number, startTime:string){
-    console.log("HOLA");
     const createdAppointment = await this._prisma.appointment.create({
       data:{
         scheduleDayId: scheduleDayId,

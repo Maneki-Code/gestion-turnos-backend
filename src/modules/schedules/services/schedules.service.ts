@@ -22,8 +22,6 @@ export class SchedulesService {
       throw new NotFoundException(
         `El usuario con email '${request.userEmail} no existe`,
       );
-    /* Validar que los días sean EDayOfWeek */
-    /* Validar que stardate, enddate, startime, y endtime están el formato adecuado */
     /* VALIDACIONES DE QUE NO SE PISEN LOS TURNOS */
 
     console.log("hola")
