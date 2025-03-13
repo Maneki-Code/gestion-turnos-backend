@@ -66,15 +66,17 @@ model Schedule {
 }
 
 model ScheduleDay {
-  id           Int           @id @default(autoincrement())
-  scheduleId   Int
-  schedule     Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  day          EDayOfWeek
-  date         DateTime
-  startTime    String
-  endTime      String
-  slotInterval Int
-  appointments Appointment[] @relation("ScheduleDayAppointments")
+  id            Int           @id @default(autoincrement())
+  scheduleId    Int
+  schedule      Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  day           EDayOfWeek
+  date          DateTime
+  startTime     String
+  endTime       String
+  restStartTime String?
+  restEndTime   String?
+  slotInterval  Int
+  appointments  Appointment[] @relation("ScheduleDayAppointments")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -85,6 +87,7 @@ model ScheduleDay {
 model Appointment {
   id            Int               @id @default(autoincrement())
   startTime     String
+  endTime       String
   description   String?
   status        AppointmentStatus
   customerId    Int?

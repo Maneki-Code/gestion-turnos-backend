@@ -8,6 +8,6 @@ export class SchedulesController {
 
   @Post()
   async createSchedule(@Body() request:ScheduleForCreationDto){
-    await this._scheduleService.create(request);
+    return await this._scheduleService.create(request);
   }
 }

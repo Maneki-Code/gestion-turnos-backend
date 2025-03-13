@@ -1,24 +1,37 @@
-import { IsArray, ArrayNotEmpty, IsString, IsEnum, IsInt, Min, Max, Matches } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsInt,
+  Min,
+  Max,
+  Matches,
+} from 'class-validator';
 import { EDayOfWeek } from '@prisma/client';
 
 export class ScheduleDayForCreationDto {
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true }) 
+  @IsString()
   @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
-    each: true,
     message: 'Each startTime must be in the format HH:mm',
   })
-  startTimes: string[];
+  startTime: string;
 
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true }) 
+  @IsString()
   @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
-    each: true, 
     message: 'Each endTime must be in the format HH:mm',
   })
-  endTimes: string[];
+  endTime: string;
+
+  @IsString()
+  @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
+    message: 'Each startTime must be in the format HH:mm',
+  })
+  startRest?: string;
+
+  @IsString()
+  @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
+    message: 'Each endTime must be in the format HH:mm',
+  })
+  endRest?: string;
 
   @IsInt()
   @Min(1)

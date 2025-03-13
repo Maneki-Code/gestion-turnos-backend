@@ -7,10 +7,8 @@ import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { ScheduleForCreationDto } from '../dtos/scheduleForCreationDto.dto';
 import { UsersService } from 'src/modules/users/services/users.service';
 import { ScheduleDaysService } from './schedule-days.service';
-import { EDayOfWeek } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { ScheduleDayForCreationDto } from '../dtos/scheduleDayForCreationDto.dto';
-import { createReadStream } from 'fs';
 
 @Injectable()
 export class SchedulesService {
@@ -22,6 +20,7 @@ export class SchedulesService {
   ) {}
 
   async create(request: ScheduleForCreationDto) {
+    //await this.validateNoOverlappingAppointments(request);
     this.validateScheduleDayForCreationDtos(request.scheduleDays);
     const userFound = await this._userService.findOneByEmail(request.userEmail);
     if (userFound === null)
@@ -38,7 +37,6 @@ export class SchedulesService {
       },
     });
 
-    // Ahora generamos los ScheduleDays para cada intervalo en cada día
     await this.createScheduleDays(
       createdSchedule.id,
       new Date(request.startDate),
@@ -48,15 +46,15 @@ export class SchedulesService {
 
     return await this._prisma.schedule.findUnique({
       where: {
-        id: createdSchedule.id
+        id: createdSchedule.id,
       },
       include: {
         scheduleDays: {
           include: {
-            appointments: true,  // Incluir los appointments dentro de cada scheduleDay
-          }
+            appointments: true,
+          },
         },
-      }
+      },
     });
   }
 
@@ -65,85 +63,72 @@ export class SchedulesService {
     startDate: Date,
     endDate: Date,
     scheduleDays: ScheduleDayForCreationDto[],
-) {
-    let currentDate = new Date(startDate);
-    currentDate.setHours(0, 0, 0, 0); 
-
-    while (currentDate <= endDate) {
-        const dayOfWeek = this._time.getDayOfWeek(currentDate);
-        const scheduleDay = scheduleDays.find((sd) => sd.day === dayOfWeek);
-
-        if (scheduleDay) {
-            console.log("ENTRO A CREAR LOS TURNOS");
-            for (let i = 0; i < scheduleDay.startTimes.length; i++) {
-                await this._schedulesDayService.create(
-                    scheduleId,
-                    dayOfWeek,
-                    new Date(currentDate),
-                    scheduleDay.startTimes[i],
-                    scheduleDay.endTimes[i],
-                    scheduleDay.slotInterval,
-                );
-            }
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-}
-
-
-  /*  private async createScheduleDays(
-    scheduleId: number,
-    startDate: Date,
-    endDate: Date,
-    days: EDayOfWeek[],
-    startTime: string,
-    endTime: string,
-    slotInterval: number
   ) {
     let currentDate = new Date(startDate);
-    currentDate.setHours(0, 0, 0, 0); 
-    const endDateObj = new Date(endDate);
-    endDateObj.setHours(0, 0, 0, 0); 
-    while (currentDate <= endDateObj) {
-      const currentDay: EDayOfWeek = this._time.getDayOfWeek(currentDate);
-  
-      if (days.includes(currentDay)) {
-        await this._schedulesDayService.create(
-          scheduleId,
-          currentDay,
-          new Date(currentDate), 
-          startTime,
-          endTime,
-          slotInterval
-        );
+    currentDate.setHours(0, 0, 0, 0);
+
+    while (currentDate <= endDate) {
+      const dayOfWeek = this._time.getDayOfWeek(currentDate);
+      const scheduleDay = scheduleDays.find((sd) => sd.day === dayOfWeek);
+
+      if (scheduleDay) {
+           await this._schedulesDayService.create(
+            scheduleId,
+            new Date(currentDate),
+            scheduleDay
+          );
       }
       currentDate.setDate(currentDate.getDate() + 1);
     }
-  } */
+  }
 
-  private validateScheduleDayForCreationDtos(
-    days: ScheduleDayForCreationDto[],
-  ) {
+  private validateScheduleDayForCreationDtos(days: ScheduleDayForCreationDto[]) {
     for (const scheduleDay of days) {
-      if (scheduleDay.startTimes.length !== scheduleDay.endTimes.length)
+      if (scheduleDay.startTime >= scheduleDay.endTime) {
         throw new BadRequestException(
-          `La cantidad de horarios debe coincidir para el día ${scheduleDay.day}.`,
+          `El horario de inicio debe ser menor que el de fin para el día ${scheduleDay.day}.`,
         );
+      }
 
-      if (
-        !this._time.isValidSchedule(
-          scheduleDay.startTimes,
-          scheduleDay.endTimes,
-        )
-      )
-        throw new BadRequestException(
-          `El horario de inicio no puede ser posterior al horario de fin para el día ${scheduleDay.day}.`,
-        );
+      if (scheduleDay.startRest && scheduleDay.endRest) {
+        if (
+          scheduleDay.startRest < scheduleDay.startTime ||
+          scheduleDay.endRest > scheduleDay.endTime
+        ) {
+          throw new BadRequestException(
+            `El horario de descanso debe estar dentro del horario laboral para el día ${scheduleDay.day}.`,
+          );
+        }
+  
+        if (scheduleDay.startRest >= scheduleDay.endRest) {
+          throw new BadRequestException(
+            `El inicio del descanso debe ser menor que el fin del descanso para el día ${scheduleDay.day}.`,
+          );
+        }
 
-      if (this._time.hasOverlap(scheduleDay.startTimes, scheduleDay.endTimes))
+        if (
+          scheduleDay.startRest === scheduleDay.startTime &&
+          scheduleDay.endRest === scheduleDay.endTime
+        ) {
+          throw new BadRequestException(
+            `El descanso no puede cubrir toda la jornada laboral para el día ${scheduleDay.day}.`,
+          );
+        }
+      }
+
+      const availableMinutes = this._time.calculateAvailableMinutes(
+        scheduleDay.startTime,
+        scheduleDay.endTime,
+        scheduleDay.startRest,
+        scheduleDay.endRest
+      );
+  
+      if (availableMinutes % scheduleDay.slotInterval !== 0) {
         throw new BadRequestException(
-          `Los horarios no se pueden solapar para el día ${scheduleDay.day}.`,
+          `El slotInterval (${scheduleDay.slotInterval} min) no encaja exactamente en el horario disponible para el día ${scheduleDay.day}.`,
         );
+      }
     }
   }
+  
 }
