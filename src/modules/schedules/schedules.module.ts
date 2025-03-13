@@ -7,10 +7,11 @@ import { UsersModule } from '../users/users.module';
 import { ScheduleDaysService } from './services/schedule-days.service';
 import { ScheduleDaysController } from './controllers/schedule-days.controller';
 import { AppointmentsModule } from '../appointments/appointments.module';
+import { TimeService } from 'src/common/time/time.service';
 
 @Module({
   imports: [UsersModule, AppointmentsModule],
-  providers: [JwtService, PrismaService, SchedulesService, ScheduleDaysService],
+  providers: [JwtService, PrismaService, TimeService, SchedulesService, ScheduleDaysService],
   controllers: [SchedulesController, ScheduleDaysController]
 })
 export class SchedulesModule {}

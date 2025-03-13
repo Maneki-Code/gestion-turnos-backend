@@ -24,6 +24,10 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, documentFactory);
+
+  const now = new Date();
+  console.log(now.toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }));
+
   await app.listen(configService.get('app.port') ?? 3000);
 }
 bootstrap();

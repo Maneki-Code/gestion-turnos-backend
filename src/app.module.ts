@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { TimeService } from './common/time/time.service';
 
 @Module({
   imports: [
@@ -20,8 +21,8 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
     AuthModule,
     SchedulesModule,
     AppointmentsModule],
-  providers: [PrismaService],
-  exports: [PrismaService]
+  providers: [PrismaService, TimeService],
+  exports: [PrismaService, TimeService]
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

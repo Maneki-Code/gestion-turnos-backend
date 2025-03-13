@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EDayOfWeek } from '@prisma/client';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { AppointmentsService } from 'src/modules/appointments/services/appointments.service';
+import { DateTime } from 'luxon';  // Importamos Luxon
 
 @Injectable()
 export class ScheduleDaysService {
@@ -10,7 +11,7 @@ export class ScheduleDaysService {
     private readonly _appointmentsService: AppointmentsService,
   ) {}
 
-  async create(scheduleId: number, day: EDayOfWeek, date:Date, startTime:string, endTime:string, slotInterval:number) {
+  async create(scheduleId: number, day: EDayOfWeek, date: Date, startTime: string, endTime: string, slotInterval: number) {
     const createScheduleDay = await this._prisma.scheduleDay.create({
       data: {
         scheduleId: scheduleId,
@@ -22,25 +23,24 @@ export class ScheduleDaysService {
       },
     });
 
-    let currentTime = this.convertToDate(date, startTime);
+    let currentTime = this.convertToDate(date, startTime);  
     const endDate = this.convertToDate(date, endTime);
 
-    while (currentTime <= endDate) {
-      await this._appointmentsService.create(createScheduleDay.id, currentTime.toISOString());
-      currentTime = this.addInterval(currentTime, slotInterval);
+    while (currentTime < endDate) {
+      await this._appointmentsService.create(createScheduleDay.id, currentTime.toISO());
+      currentTime = this.addInterval(currentTime, slotInterval);  
     }
   }
 
-  private convertToDate(date: Date, time: string): Date {
+  private convertToDate(date: Date, time: string): DateTime {
     const [hours, minutes] = time.split(':').map(Number);
-    const newDate = new Date(date);
-    newDate.setHours(hours, minutes, 0, 0); 
-    return newDate;
+
+    return DateTime.fromJSDate(date)
+      .set({ hour: hours, minute: minutes, second: 0, millisecond: 0 })
+      .setZone('America/Argentina/Buenos_Aires');  
   }
 
-  private addInterval(currentTime: Date, interval: number): Date {
-    const newTime = new Date(currentTime);
-    newTime.setMinutes(currentTime.getMinutes() + interval); 
-    return newTime;
+  private addInterval(currentTime: DateTime, interval: number): DateTime {
+    return currentTime.plus({ minutes: interval });
   }
 }
