@@ -14,21 +14,19 @@ export class ScheduleDaysService {
     const createScheduleDay = await this._prisma.scheduleDay.create({
       data: {
         scheduleId: scheduleId,
+        startTime: startTime,
+        endTime: endTime,
+        slotInterval: slotInterval,
         date: date,
         day: day,
       },
     });
 
-    // Convertir las horas de inicio y fin en objetos Date
     let currentTime = this.convertToDate(date, startTime);
     const endDate = this.convertToDate(date, endTime);
 
-    // Generamos los turnos en el intervalo especificado
     while (currentTime <= endDate) {
-      // Crear el turno (appointment)
       await this._appointmentsService.create(createScheduleDay.id, currentTime.toISOString());
-
-      // Aumentamos el tiempo por el intervalo
       currentTime = this.addInterval(currentTime, slotInterval);
     }
   }

@@ -24,20 +24,18 @@ export class SchedulesService {
       );
     /* VALIDACIONES DE QUE NO SE PISEN LOS TURNOS */
 
-    console.log("hola")
+    
     const createdSchedule = await this._prisma.schedule.create({
       data: {
         userId: userFound.id,
-        startDate: request.startDate,
-        endDate: request.endDate,
-        startTime: request.startTime,
-        endTime: request.endTime,
-        slotInterval: request.slotInterval,
+        startDate: new Date(request.startDate), // Convertir a Date
+        endDate: new Date(request.endDate),
         description: request.description,
       }
     });
 
-   await this.createScheduleDays(
+    console.log('hola');
+   /* await this.createScheduleDays(
       createdSchedule.id,
       request.startDate,
       request.endDate,
@@ -45,10 +43,10 @@ export class SchedulesService {
       request.startTime,
       request.endTime,
       request.slotInterval
-    ); 
+    );  */
   }
 
-  private async createScheduleDays(
+  /* private async createScheduleDays(
     scheduleId: number,
     startDate: Date,
     endDate: Date,
@@ -58,11 +56,9 @@ export class SchedulesService {
     slotInterval: number
   ) {
     let currentDate = new Date(startDate);
-    currentDate.setHours(0, 0, 0, 0); // Asegúrate de que la hora sea 00:00:00 para evitar problemas con la comparación de fechas
-  
+    currentDate.setHours(0, 0, 0, 0); 
     const endDateObj = new Date(endDate);
-    endDateObj.setHours(0, 0, 0, 0); // Igual para la fecha de fin
-  
+    endDateObj.setHours(0, 0, 0, 0); 
     while (currentDate <= endDateObj) {
       const currentDay: EDayOfWeek = this.getDayOfWeek(currentDate);
   
@@ -70,17 +66,15 @@ export class SchedulesService {
         await this._schedulesDayService.create(
           scheduleId,
           currentDay,
-          new Date(currentDate), // Para evitar cualquier posible referencia errónea
+          new Date(currentDate), 
           startTime,
           endTime,
           slotInterval
         );
       }
-  
-      // Incrementa un día
       currentDate.setDate(currentDate.getDate() + 1);
     }
-  }
+  } */
   
 
   private getDayOfWeek(date: Date): EDayOfWeek {

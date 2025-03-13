@@ -57,9 +57,6 @@ model Schedule {
   user         User          @relation("UserSchedules", fields: [userId], references: [id])
   startDate    DateTime
   endDate      DateTime
-  startTime    String
-  endTime      String
-  slotInterval Int
   scheduleDays ScheduleDay[]
 
   createdAt DateTime @default(now())
@@ -73,7 +70,10 @@ model ScheduleDay {
   scheduleId   Int
   schedule     Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   day          EDayOfWeek
-  date      DateTime
+  date         DateTime
+  startTime    String
+  endTime      String
+  slotInterval Int
   appointments Appointment[] @relation("ScheduleDayAppointments")
 
   createdAt DateTime @default(now())
