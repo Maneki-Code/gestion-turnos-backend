@@ -1,5 +1,6 @@
-import { IsEmail, IsString, IsDateString, IsArray, ArrayNotEmpty, IsEnum } from 'class-validator';
+import { IsEmail, IsString, IsDateString, IsArray, ArrayNotEmpty, IsEnum, IsDate } from 'class-validator';
 import { ScheduleDayForCreationDto } from './scheduleDayForCreationDto.dto';
+import { Type } from 'class-transformer';
 
 
 export class ScheduleForCreationDto {
@@ -9,10 +10,12 @@ export class ScheduleForCreationDto {
   @IsString()
   description: string;
 
-  @IsDateString()
+  @Type(() => Date)  
+  @IsDate()
   startDate: Date;
 
-  @IsDateString()
+  @Type(() => Date)
+  @IsDate()
   endDate: Date;
 
   @IsArray()

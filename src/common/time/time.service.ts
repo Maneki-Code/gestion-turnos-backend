@@ -1,16 +1,15 @@
-import { Injectable } from "@nestjs/common";
-import { EDayOfWeek } from "@prisma/client";
-import { DateTime } from 'luxon';  // Importamos Luxon
+import { Injectable } from '@nestjs/common';
+import { EDayOfWeek } from '@prisma/client';
+import { DateTime } from 'luxon'; // Importamos Luxon
 
 @Injectable()
 export class TimeService {
-  
   timeToMinutes(time: string): number {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
   }
 
- /*  hasOverlap(startTimes: string[], endTimes: string[]): boolean {
+  /*  hasOverlap(startTimes: string[], endTimes: string[]): boolean {
     const intervals = startTimes.map((startTime, index) => ({
       start: this.timeToMinutes(startTime),
       end: this.timeToMinutes(endTimes[index]),
@@ -46,23 +45,19 @@ export class TimeService {
   } */
 
   convertToDate(date: Date, time: string): DateTime {
-    console.log(`TIME RECIBIDO: "${time}"`);
-    return DateTime.fromFormat(time, "HH:mm", { zone: "America/Argentina/Buenos_Aires" })
-      .set({
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDate()
-      });
+    const [hours, minutes] = time.split(':').map((part) => parseInt(part, 10));
+
+    return DateTime.fromJSDate(date)
+      .set({ hour: hours, minute: minutes, second: 0, millisecond: 0 })
+      .setZone('America/Argentina/Buenos_Aires', { keepLocalTime: true });
   }
-  
 
   addInterval(currentTime: DateTime, interval: number): DateTime {
     return currentTime.plus({ minutes: interval });
   }
 
-
   getDayOfWeek(date: Date): EDayOfWeek {
-    const dayOfWeek = date.getDay(); 
+    const dayOfWeek = date.getDay();
     switch (dayOfWeek) {
       case 0:
         return EDayOfWeek.SUNDAY;
@@ -87,19 +82,18 @@ export class TimeService {
     startTime: string,
     endTime: string,
     startRest?: string,
-    endRest?: string
+    endRest?: string,
   ): number {
-
     const startMinutes = this.timeToMinutes(startTime);
     const endMinutes = this.timeToMinutes(endTime);
-  
+
     if (startRest && endRest) {
       const startRestMinutes = this.timeToMinutes(startRest);
       const endRestMinutes = this.timeToMinutes(endRest);
-  
-      return (endMinutes - startMinutes) - (endRestMinutes - startRestMinutes);
+
+      return endMinutes - startMinutes - (endRestMinutes - startRestMinutes);
     }
-  
+
     return endMinutes - startMinutes;
   }
 }

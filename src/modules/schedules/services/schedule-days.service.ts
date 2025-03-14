@@ -49,7 +49,7 @@ export class ScheduleDaysService {
         currentTime = this._time.addInterval(currentTime, request.slotInterval);
         endCurrentTime = this._time.addInterval(endCurrentTime, request.slotInterval);
       }
-    }
+    } 
   }
 
 

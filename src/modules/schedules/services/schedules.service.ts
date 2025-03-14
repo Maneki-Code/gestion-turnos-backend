@@ -9,6 +9,7 @@ import { UsersService } from 'src/modules/users/services/users.service';
 import { ScheduleDaysService } from './schedule-days.service';
 import { TimeService } from 'src/common/time/time.service';
 import { ScheduleDayForCreationDto } from '../dtos/scheduleDayForCreationDto.dto';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class SchedulesService {
@@ -20,27 +21,27 @@ export class SchedulesService {
   ) {}
 
   async create(request: ScheduleForCreationDto) {
-    //await this.validateNoOverlappingAppointments(request);
     this.validateScheduleDayForCreationDtos(request.scheduleDays);
     const userFound = await this._userService.findOneByEmail(request.userEmail);
     if (userFound === null)
       throw new NotFoundException(
-        `El usuario con email '${request.userEmail} no existe`,
-      );
+    `El usuario con email '${request.userEmail} no existe`,
+    );
+    await this.validateNoOverlappingAppointments(request);
 
     const createdSchedule = await this._prisma.schedule.create({
       data: {
         userId: userFound.id,
-        startDate: new Date(request.startDate),
-        endDate: new Date(request.endDate),
+        startDate: request.startDate,
+        endDate: request.endDate,
         description: request.description,
       },
     });
 
     await this.createScheduleDays(
       createdSchedule.id,
-      new Date(request.startDate),
-      new Date(request.endDate),
+      request.startDate,
+      request.endDate,
       request.scheduleDays,
     );
 
@@ -55,7 +56,7 @@ export class SchedulesService {
           },
         },
       },
-    });
+    }); 
   }
 
   private async createScheduleDays(
@@ -65,7 +66,6 @@ export class SchedulesService {
     scheduleDays: ScheduleDayForCreationDto[],
   ) {
     let currentDate = new Date(startDate);
-    currentDate.setHours(0, 0, 0, 0);
 
     while (currentDate <= endDate) {
       const dayOfWeek = this._time.getDayOfWeek(currentDate);
@@ -74,7 +74,7 @@ export class SchedulesService {
       if (scheduleDay) {
            await this._schedulesDayService.create(
             scheduleId,
-            new Date(currentDate),
+            currentDate,
             scheduleDay
           );
       }
@@ -131,4 +131,40 @@ export class SchedulesService {
     }
   }
   
+  async validateNoOverlappingAppointments(request: ScheduleForCreationDto) {
+    const startDate = request.startDate;
+    const endDate = request.endDate;
+  
+    const scheduleDays = await this._schedulesDayService.findAllBetweenDatesByUser(
+      request.userEmail,
+      startDate,
+      endDate
+    );
+  
+    scheduleDays.forEach((scheduleDay) => {
+      let currentDate = new Date(startDate); 
+      while (currentDate < endDate) {
+        const dayOfWeek = this._time.getDayOfWeek(currentDate);
+        
+        if (scheduleDay.day === dayOfWeek) {
+          request.scheduleDays.forEach((scheduleDayDto) => {
+            const interval = scheduleDayDto.slotInterval;
+            let startTime = this._time.convertToDate(currentDate, scheduleDayDto.startTime);
+            let endTime = this._time.convertToDate(currentDate, scheduleDayDto.startTime).plus({minutes: interval});
+            
+            scheduleDay.appointments.forEach(appointment => {
+              const AppointmentStartTime = DateTime.fromISO(appointment.startTime, { zone: 'America/Argentina/Buenos_Aires' });
+              const AppointmentEndTime = DateTime.fromISO(appointment.endTime, { zone: 'America/Argentina/Buenos_Aires' });
+              if (startTime < AppointmentEndTime && endTime > AppointmentStartTime) {
+                throw new BadRequestException('El horario se solapa con una cita existente.');
+              }
+              startTime = startTime.plus({ minutes: interval }); 
+              endTime = startTime.plus({ minutes: interval });
+            });
+          });
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+  }
 }
