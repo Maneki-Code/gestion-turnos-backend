@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/services/users.service';
 import { LoginDto } from '../dtos/login.dto';
 import { RegisterDto } from '../dtos/register.dto';
@@ -14,26 +14,47 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly hashService: HashService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
-  async login(request: LoginDto, response: Response): Promise<void> {
-    const user = await this.validateUser(request.email, request.password);
-    if (!user) throw new UnauthorizedException('Email o contraseña inválidos');
 
-    const token = this.generateToken(user);
+  async login(request: LoginDto, response: Response): Promise<Response> {
+    try {
+      const user = await this.validateUser(request.email, request.password);
 
-    this.setJwtCookie(response, token);
+      if (!user) {
+        return response.status(401).json({
+          status: 401,
+          message: 'Invalid email or password',
+          user: null,
+        });
+      }
 
-    response.status(200).send({
-      message: 'Login successful',
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.email,
-    });
+      const token = this.generateToken(user);
+      this.setJwtCookie(response, token);
 
-    return;
+      return response.status(200).json({
+        status: 200,
+        message: 'Login successful',
+        user: {
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+        }
+      });
+
+    } catch (error) {
+      console.error('Error during login:', error);
+      return response.status(500).json({
+        status: 500,
+        message: 'Internal server error',
+      });
+    }
   }
-
   async register(request: RegisterDto) {
+    const existingUser = await this.userService.findOneByEmail(request.email);
+    if (existingUser) {
+      throw new HttpException('User email already exists', HttpStatus.CONFLICT);
+    }
+    
     return await this.userService.create({
       firstName: request.firstName,
       lastName: request.lastName,
@@ -41,12 +62,13 @@ export class AuthService {
       password: await this.hashService.hashPassword(request.password),
     });
   }
+  
 
   async logout(response: Response): Promise<void> {
     // Eliminar la cookie del JWT
     response.clearCookie('Authentication', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       sameSite: 'strict',
       path: '/',
     });
@@ -80,7 +102,7 @@ export class AuthService {
   setJwtCookie(response: Response, token: string) {
     response.cookie('Authentication', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       sameSite: 'strict',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
