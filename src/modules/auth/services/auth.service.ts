@@ -6,6 +6,7 @@ import { HashService } from './hash/hash.service';
 import { User } from '@prisma/client';
 import { AuthResponse } from '../dtos/auth.response';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -15,15 +16,21 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(request: LoginDto): Promise<AuthResponse> {
+  async login(request: LoginDto, response: Response): Promise<void> {
     const user = await this.validateUser(request.email, request.password);
     if (!user) throw new UnauthorizedException('Email o contraseña inválidos');
 
-    return {
-      token: this.generateToken(user),
+    const token = this.generateToken(user);
+
+    this.setJwtCookie(response, token);
+
+    response.status(200).send({
+      message: 'Login successful',
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,
-    };
+    });
+
+    return;
   }
 
   async register(request: RegisterDto) {
@@ -46,12 +53,38 @@ export class AuthService {
     return null;
   }
 
+  async logout(response: Response): Promise<void> {
+    // Eliminar la cookie del JWT
+    response.clearCookie('Authentication', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+    });
+
+    // Responder con un mensaje de éxito
+    response.status(200).send({ message: 'Logged out successfully' });
+  }
+
   generateToken(user: User): string {
     const payload = {
       email: user.email,
-      role: user.role
+      role: user.role,
     };
 
-    return this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload);
+    console.log('Generated Token:', token);
+    return token;
+  }
+
+  setJwtCookie(response: Response, token: string) {
+    response.cookie('Authentication', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+
+    console.log('Cookie set:', token);
   }
 }
