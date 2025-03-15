@@ -1,16 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { EDayOfWeek, ScheduleDay } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Appointment, EDayOfWeek, ScheduleDay } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { AppointmentsService } from 'src/modules/appointments/services/appointments.service';
 import { ScheduleDayForCreationDto } from '../dtos/scheduleDayForCreationDto.dto';
+import { UsersService } from 'src/modules/users/services/users.service';
+import { ScheduleDayResponse } from '../dtos/scheduleDay.response';
 
 
 @Injectable()
 export class ScheduleDaysService {
+  
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _time: TimeService,
+    private readonly _usersService: UsersService,
     private readonly _appointmentsService: AppointmentsService,
   ) {}
 
@@ -52,6 +56,20 @@ export class ScheduleDaysService {
     } 
   }
 
+  async findOneById(id:number):Promise<ScheduleDayResponse> {
+    const response = await this._prisma.scheduleDay.findUnique({
+      where:{
+        id
+      },
+      include:{
+        appointments: true
+      }
+    })
+
+    if(!response) throw new NotFoundException('No se encontró la agenda del día');
+
+    return this.parseScheduleDayToResponseFull(response, response.appointments);
+  }
 
   async findAllBetweenDatesByUser(email: string, startDate: Date, endDate: Date){
     return await this._prisma.scheduleDay.findMany({
@@ -70,5 +88,19 @@ export class ScheduleDaysService {
         appointments:true
       }
     });
+  }
+
+
+
+  parseScheduleDayToResponseFull(scheduleDay: ScheduleDay, appointments:Appointment[]): ScheduleDayResponse{
+    return {
+        id: scheduleDay.id,
+        day: scheduleDay.day,
+        date: scheduleDay.date.toISOString(),
+        startTime: scheduleDay.startTime,
+        endTime: scheduleDay.endTime,
+        slotInterval: scheduleDay.slotInterval,
+        appointments: appointments.map( appointment => this._appointmentsService.parseAppointmentToResponse(appointment))
+    }
   }
 }
