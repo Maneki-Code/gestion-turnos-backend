@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EDayOfWeek } from '@prisma/client';
 import { DateTime } from 'luxon'; // Importamos Luxon
 
@@ -9,40 +9,14 @@ export class TimeService {
     return hours * 60 + minutes;
   }
 
-  /*  hasOverlap(startTimes: string[], endTimes: string[]): boolean {
-    const intervals = startTimes.map((startTime, index) => ({
-      start: this.timeToMinutes(startTime),
-      end: this.timeToMinutes(endTimes[index]),
-    }));
-
-    intervals.sort((a, b) => a.start - b.start);
-
-    for (let i = 0; i < intervals.length - 1; i++) {
-      if (intervals[i].end > intervals[i + 1].start) {
-        return true;
-      }
+  parseStringToDate(date:string){
+    try{
+      const newDate = new Date(date);
+      return newDate;
+    }catch(error){
+      throw new BadRequestException('Formato de fecha inválido');
     }
-    return false;
   }
-
-  hasOverlapSimple(startTime: string, endTime: string): boolean {
-    const start = this.timeToMinutes(startTime);
-    const end = this.timeToMinutes(endTime);
-
-    return start < end;
-  }
-
-  isValidSchedule(startTimes: string[], endTimes: string[]): boolean {
-    for (let i = 0; i < startTimes.length; i++) {
-      const start = this.timeToMinutes(startTimes[i]);
-      const end = this.timeToMinutes(endTimes[i]);
-      
-      if (start >= end) {
-        return false;
-      }
-    }
-    return true;  
-  } */
 
   convertToDate(date: Date, time: string): DateTime {
     const [hours, minutes] = time.split(':').map((part) => parseInt(part, 10));

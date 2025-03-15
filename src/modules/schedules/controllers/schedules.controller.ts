@@ -10,4 +10,5 @@ export class SchedulesController {
   async createSchedule(@Body() request:ScheduleForCreationDto){
     return await this._scheduleService.create(request);
   }
+  
 }
