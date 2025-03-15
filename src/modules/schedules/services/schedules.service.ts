@@ -131,7 +131,7 @@ export class SchedulesService {
     }
   }
   
-  async validateNoOverlappingAppointments(request: ScheduleForCreationDto) {
+  private async validateNoOverlappingAppointments(request: ScheduleForCreationDto) {
     const startDate = request.startDate;
     const endDate = request.endDate;
   
