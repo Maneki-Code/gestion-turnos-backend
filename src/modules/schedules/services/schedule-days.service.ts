@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EDayOfWeek, ScheduleDay } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { AppointmentsService } from 'src/modules/appointments/services/appointments.service';
 import { ScheduleDayForCreationDto } from '../dtos/scheduleDayForCreationDto.dto';
+import { UsersService } from 'src/modules/users/services/users.service';
 
 
 @Injectable()
 export class ScheduleDaysService {
+  
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _time: TimeService,
+    private readonly _usersService: UsersService,
     private readonly _appointmentsService: AppointmentsService,
   ) {}
 
@@ -52,6 +55,22 @@ export class ScheduleDaysService {
     } 
   }
 
+  async findOneByDateAndUserEmail(date: string, email: string) {
+    const userFound = this._usersService.findOneByEmail(email);
+
+    if(!userFound) throw new NotFoundException(`Usuario con email ${email} no encontrado`);
+
+    const newDate = this._time.parseStringToDate(date);
+
+    return this._prisma.scheduleDay.findMany({
+      where:{
+        date: newDate
+      },
+      include:{
+        appointments: true
+      }
+    })
+  }
 
   async findAllBetweenDatesByUser(email: string, startDate: Date, endDate: Date){
     return await this._prisma.scheduleDay.findMany({
