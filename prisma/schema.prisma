@@ -73,15 +73,24 @@ model ScheduleDay {
   date          DateTime
   startTime     String
   endTime       String
-  restStartTime String?
-  restEndTime   String?
   slotInterval  Int
   appointments  Appointment[] @relation("ScheduleDayAppointments")
-
+  rests     ScheduleDayRest[] @relation("ScheduleDayToRests")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("schedule_days")
+}
+
+model ScheduleDayRest {
+  id        Int           @id @default(autoincrement())
+  scheduleDayId Int
+  scheduleDay   ScheduleDay       @relation("ScheduleDayToRests", fields: [scheduleDayId], references: [id])
+  restStartTime String
+  restEndTime   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("schedule_day_rests")
 }
 
 model Appointment {
