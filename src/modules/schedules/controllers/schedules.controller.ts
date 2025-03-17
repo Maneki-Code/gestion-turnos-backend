@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Patch, Post, UseGuards } from '@nestjs/common';
 import { SchedulesService } from '../services/schedules.service';
 import { ScheduleForCreationDto } from '../dtos/scheduleForCreationDto.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -16,4 +16,8 @@ export class SchedulesController {
     return await this._scheduleService.create(request);
   }
   
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Patch('update')
+  async updateSchedule(@Body() request: )
 }
