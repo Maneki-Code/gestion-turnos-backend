@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -25,8 +26,8 @@ export class SchedulesService {
     const userFound = await this._userService.findOneByEmail(request.userEmail);
     if (userFound === null)
       throw new NotFoundException(
-    `El usuario con email '${request.userEmail} no existe`,
-    );
+        `El usuario con email '${request.userEmail} no existe`,
+      );
     await this.validateNoOverlappingAppointments(request);
 
     const createdSchedule = await this._prisma.schedule.create({
@@ -56,7 +57,7 @@ export class SchedulesService {
           },
         },
       },
-    }); 
+    });
   }
 
   private async createScheduleDays(
@@ -72,17 +73,53 @@ export class SchedulesService {
       const scheduleDay = scheduleDays.find((sd) => sd.day === dayOfWeek);
 
       if (scheduleDay) {
-           await this._schedulesDayService.create(
-            scheduleId,
-            currentDate,
-            scheduleDay
-          );
+        await this._schedulesDayService.create(
+          scheduleId,
+          currentDate,
+          scheduleDay,
+        );
       }
       currentDate.setDate(currentDate.getDate() + 1);
     }
   }
 
-  private validateScheduleDayForCreationDtos(days: ScheduleDayForCreationDto[]) {
+  async delete(id: number): Promise<void> {
+    const scheduleFound = await this._prisma.schedule.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        scheduleDays: {
+          include: {
+            appointments: true,
+          },
+        },
+      },
+    });
+
+    if (!scheduleFound)
+      throw new NotFoundException(`Agenda con id ${id} no encontrada`);
+
+    for (const scheduleDay of scheduleFound.scheduleDays) {
+      for (const appointment of scheduleDay.appointments) {
+        if (appointment.customerId !== null) {
+          throw new ConflictException(
+            `No puede eliminarse una agenda con turnos reservados`,
+          );
+        }
+      }
+    }
+
+    await this._prisma.schedule.delete({
+      where:{
+        id
+      }
+    })
+  }
+
+  private validateScheduleDayForCreationDtos(
+    days: ScheduleDayForCreationDto[],
+  ) {
     for (const scheduleDay of days) {
       if (scheduleDay.startTime >= scheduleDay.endTime) {
         throw new BadRequestException(
@@ -92,7 +129,10 @@ export class SchedulesService {
 
       for (const rest of scheduleDay.rests) {
         if (rest.startRest && rest.endRest) {
-          if (rest.startRest < scheduleDay.startTime || rest.endRest > scheduleDay.endTime) {
+          if (
+            rest.startRest < scheduleDay.startTime ||
+            rest.endRest > scheduleDay.endTime
+          ) {
             throw new BadRequestException(
               `El horario de descanso (${rest.startRest} - ${rest.endRest}) debe estar dentro del horario laboral para el día ${scheduleDay.day}.`,
             );
@@ -104,16 +144,16 @@ export class SchedulesService {
           }
         }
       }
-  
+
       const availableMinutes = this._time.calculateAvailableMinutes(
         scheduleDay.startTime,
         scheduleDay.endTime,
         scheduleDay.rests
-          .filter(rest => rest.startRest && rest.endRest) 
-          .map(rest => ({
+          .filter((rest) => rest.startRest && rest.endRest)
+          .map((rest) => ({
             start: rest.startRest!,
-            end: rest.endRest!
-          }))
+            end: rest.endRest!,
+          })),
       );
 
       if (availableMinutes % scheduleDay.slotInterval !== 0) {
@@ -123,35 +163,53 @@ export class SchedulesService {
       }
     }
   }
-  
-  private async validateNoOverlappingAppointments(request: ScheduleForCreationDto) {
+
+  private async validateNoOverlappingAppointments(
+    request: ScheduleForCreationDto,
+  ) {
     const startDate = request.startDate;
     const endDate = request.endDate;
-  
-    const scheduleDays = await this._schedulesDayService.findAllBetweenDatesByUser(
-      request.userEmail,
-      startDate,
-      endDate
-    );
-  
+
+    const scheduleDays =
+      await this._schedulesDayService.findAllBetweenDatesByUser(
+        request.userEmail,
+        startDate,
+        endDate,
+      );
+
     scheduleDays.forEach((scheduleDay) => {
-      let currentDate = new Date(startDate); 
+      let currentDate = new Date(startDate);
       while (currentDate < endDate) {
         const dayOfWeek = this._time.getDayOfWeek(currentDate);
-        
+
         if (scheduleDay.day === dayOfWeek) {
           request.scheduleDays.forEach((scheduleDayDto) => {
             const interval = scheduleDayDto.slotInterval;
-            let startTime = this._time.convertToDate(currentDate, scheduleDayDto.startTime);
-            let endTime = this._time.convertToDate(currentDate, scheduleDayDto.startTime).plus({minutes: interval});
-            
-            scheduleDay.appointments.forEach(appointment => {
-              const AppointmentStartTime = DateTime.fromISO(appointment.startTime, { zone: 'America/Argentina/Buenos_Aires' });
-              const AppointmentEndTime = DateTime.fromISO(appointment.endTime, { zone: 'America/Argentina/Buenos_Aires' });
-              if (startTime < AppointmentEndTime && endTime > AppointmentStartTime) {
-                throw new BadRequestException('El horario se solapa con una cita existente.');
+            let startTime = this._time.convertToDate(
+              currentDate,
+              scheduleDayDto.startTime,
+            );
+            let endTime = this._time
+              .convertToDate(currentDate, scheduleDayDto.startTime)
+              .plus({ minutes: interval });
+
+            scheduleDay.appointments.forEach((appointment) => {
+              const AppointmentStartTime = DateTime.fromISO(
+                appointment.startTime,
+                { zone: 'America/Argentina/Buenos_Aires' },
+              );
+              const AppointmentEndTime = DateTime.fromISO(appointment.endTime, {
+                zone: 'America/Argentina/Buenos_Aires',
+              });
+              if (
+                startTime < AppointmentEndTime &&
+                endTime > AppointmentStartTime
+              ) {
+                throw new BadRequestException(
+                  'El horario se solapa con una cita existente.',
+                );
               }
-              startTime = startTime.plus({ minutes: interval }); 
+              startTime = startTime.plus({ minutes: interval });
               endTime = startTime.plus({ minutes: interval });
             });
           });

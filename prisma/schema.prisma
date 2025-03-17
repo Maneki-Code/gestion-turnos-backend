@@ -85,7 +85,7 @@ model ScheduleDay {
 model ScheduleDayRest {
   id        Int           @id @default(autoincrement())
   scheduleDayId Int
-  scheduleDay   ScheduleDay       @relation("ScheduleDayToRests", fields: [scheduleDayId], references: [id])
+  scheduleDay   ScheduleDay       @relation("ScheduleDayToRests", fields: [scheduleDayId], references: [id], onDelete: Cascade)
   restStartTime String
   restEndTime   String
   createdAt DateTime @default(now())
@@ -102,7 +102,7 @@ model Appointment {
   customerId    Int?
   customer      Customer?         @relation(fields: [customerId], references: [id])
   scheduleDayId Int
-  scheduleDay   ScheduleDay       @relation("ScheduleDayAppointments", fields: [scheduleDayId], references: [id])
+  scheduleDay   ScheduleDay       @relation("ScheduleDayAppointments", fields: [scheduleDayId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
