@@ -1,3 +1,4 @@
+
 import { Body, Controller, Get, HttpCode, Post, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
@@ -41,6 +42,7 @@ export class AuthController {
   async register(@Body() request: RegisterDto): Promise<void> {
     await this.authService.register(request);
   }
+
 
   // auth.controller.ts
   @Post('logout')

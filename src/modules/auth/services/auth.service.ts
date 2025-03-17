@@ -16,7 +16,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) { }
 
-
   async login(request: LoginDto, response: Response): Promise<Response> {
     try {
       const user = await this.validateUser(request.email, request.password);
@@ -31,6 +30,7 @@ export class AuthService {
 
       const token = this.generateToken(user);
       this.setJwtCookie(response, token);
+
 
       return response.status(200).json({
         status: 200,
@@ -49,6 +49,7 @@ export class AuthService {
       });
     }
   }
+  
   async register(request: RegisterDto) {
     const existingUser = await this.userService.findOneByEmail(request.email);
     if (existingUser) {
@@ -88,6 +89,20 @@ export class AuthService {
     return null;
   }
 
+  async logout(response: Response): Promise<void> {
+    // Eliminar la cookie del JWT
+    response.clearCookie('Authentication', {
+      httpOnly: true,
+      secure:false,
+      //secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+    });
+
+    // Responder con un mensaje de éxito
+    response.status(200).send({ message: 'Logged out successfully' });
+  }
+
   generateToken(user: User): string {
     const payload = {
       email: user.email,
@@ -103,6 +118,7 @@ export class AuthService {
     response.cookie('Authentication', token, {
       httpOnly: true,
       secure: false,
+      //secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
