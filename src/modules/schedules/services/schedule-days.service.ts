@@ -26,13 +26,11 @@ export class ScheduleDaysService {
         endTime: request.endTime,
         slotInterval: request.slotInterval,
         date: date,
-        day: request.day,
-        ...(request.startRest && { restStartTime: request.startRest }),
-        ...(request.endRest && { restEndTime: request.endRest }),
+        day: request.day
       },
     });
 
-    let currentTime = this._time.convertToDate(date, request.startTime);  
+/*     let currentTime = this._time.convertToDate(date, request.startTime);  
     let endCurrentTime = this._time.addInterval(currentTime, request.slotInterval);
     const endDate = this._time.convertToDate(date, request.endTime);
 
@@ -53,7 +51,7 @@ export class ScheduleDaysService {
         currentTime = this._time.addInterval(currentTime, request.slotInterval);
         endCurrentTime = this._time.addInterval(endCurrentTime, request.slotInterval);
       }
-    } 
+    }  */
   }
 
   async findOneById(id:number):Promise<ScheduleDayResponse> {

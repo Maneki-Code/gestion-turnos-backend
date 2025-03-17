@@ -5,9 +5,11 @@ import {
   Min,
   Max,
   Matches,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { EDayOfWeek } from '@prisma/client';
+import { ScheduleDayRestForCreationDto } from './scheduleDayRestForCreationDto.dto';
 
 export class ScheduleDayForCreationDto {
   @ApiProperty({
@@ -31,26 +33,10 @@ export class ScheduleDayForCreationDto {
   endTime: string;
 
   @ApiProperty({
-    description: 'Start time of the rest period (HH:mm format)',
-    example: '12:00',
-    required: false
+    description: 'List of rests'
   })
-  @IsString()
-  @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
-    message: 'Each startRest must be in the format HH:mm',
-  })
-  startRest?: string;
-
-  @ApiProperty({
-    description: 'End time of the rest period (HH:mm format)',
-    example: '13:00',
-    required: false
-  })
-  @IsString()
-  @Matches(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/, {
-    message: 'Each endRest must be in the format HH:mm',
-  })
-  endRest?: string;
+  @IsArray()
+  rests: ScheduleDayRestForCreationDto[];
 
   @ApiProperty({
     description: 'Time slot interval in minutes',

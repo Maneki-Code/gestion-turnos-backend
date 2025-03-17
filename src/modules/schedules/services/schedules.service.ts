@@ -90,39 +90,32 @@ export class SchedulesService {
         );
       }
 
-      if (scheduleDay.startRest && scheduleDay.endRest) {
-        if (
-          scheduleDay.startRest < scheduleDay.startTime ||
-          scheduleDay.endRest > scheduleDay.endTime
-        ) {
-          throw new BadRequestException(
-            `El horario de descanso debe estar dentro del horario laboral para el día ${scheduleDay.day}.`,
-          );
-        }
-  
-        if (scheduleDay.startRest >= scheduleDay.endRest) {
-          throw new BadRequestException(
-            `El inicio del descanso debe ser menor que el fin del descanso para el día ${scheduleDay.day}.`,
-          );
-        }
-
-        if (
-          scheduleDay.startRest === scheduleDay.startTime &&
-          scheduleDay.endRest === scheduleDay.endTime
-        ) {
-          throw new BadRequestException(
-            `El descanso no puede cubrir toda la jornada laboral para el día ${scheduleDay.day}.`,
-          );
+      for (const rest of scheduleDay.rests) {
+        if (rest.startRest && rest.endRest) {
+          if (rest.startRest < scheduleDay.startTime || rest.endRest > scheduleDay.endTime) {
+            throw new BadRequestException(
+              `El horario de descanso (${rest.startRest} - ${rest.endRest}) debe estar dentro del horario laboral para el día ${scheduleDay.day}.`,
+            );
+          }
+          if (rest.startRest >= rest.endRest) {
+            throw new BadRequestException(
+              `El inicio del descanso (${rest.startRest}) debe ser menor que el fin del descanso (${rest.endRest}) para el día ${scheduleDay.day}.`,
+            );
+          }
         }
       }
-
+  
       const availableMinutes = this._time.calculateAvailableMinutes(
         scheduleDay.startTime,
         scheduleDay.endTime,
-        scheduleDay.startRest,
-        scheduleDay.endRest
+        scheduleDay.rests
+          .filter(rest => rest.startRest && rest.endRest) 
+          .map(rest => ({
+            start: rest.startRest!,
+            end: rest.endRest!
+          }))
       );
-  
+
       if (availableMinutes % scheduleDay.slotInterval !== 0) {
         throw new BadRequestException(
           `El slotInterval (${scheduleDay.slotInterval} min) no encaja exactamente en el horario disponible para el día ${scheduleDay.day}.`,

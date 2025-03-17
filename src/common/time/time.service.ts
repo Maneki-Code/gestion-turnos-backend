@@ -55,19 +55,23 @@ export class TimeService {
   public calculateAvailableMinutes(
     startTime: string,
     endTime: string,
-    startRest?: string,
-    endRest?: string,
+    rests: { start: string; end: string }[] = []
   ): number {
     const startMinutes = this.timeToMinutes(startTime);
     const endMinutes = this.timeToMinutes(endTime);
-
-    if (startRest && endRest) {
-      const startRestMinutes = this.timeToMinutes(startRest);
-      const endRestMinutes = this.timeToMinutes(endRest);
-
-      return endMinutes - startMinutes - (endRestMinutes - startRestMinutes);
+    
+    let totalRestMinutes = 0;
+  
+    // Iterar sobre el array de descansos para calcular el total de minutos de descanso
+    for (const rest of rests) {
+      if (rest.start && rest.end) {
+        const startRestMinutes = this.timeToMinutes(rest.start);
+        const endRestMinutes = this.timeToMinutes(rest.end);
+        totalRestMinutes += (endRestMinutes - startRestMinutes);
+      }
     }
-
-    return endMinutes - startMinutes;
+  
+    return endMinutes - startMinutes - totalRestMinutes;
   }
+  
 }
