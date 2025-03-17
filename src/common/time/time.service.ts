@@ -62,7 +62,6 @@ export class TimeService {
     
     let totalRestMinutes = 0;
   
-    // Iterar sobre el array de descansos para calcular el total de minutos de descanso
     for (const rest of rests) {
       if (rest.start && rest.end) {
         const startRestMinutes = this.timeToMinutes(rest.start);
