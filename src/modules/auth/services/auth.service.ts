@@ -64,20 +64,6 @@ export class AuthService {
     });
   }
   
-
-  async logout(response: Response): Promise<void> {
-    // Eliminar la cookie del JWT
-    response.clearCookie('Authentication', {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'strict',
-      path: '/',
-    });
-
-    // Responder con un mensaje de éxito
-    response.status(200).send({ message: 'Logged out successfully' });
-  }
-
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.userService.findOneByEmail(email);
     if (
