@@ -1,14 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsNotEmpty, IsNumber, IsPositive, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsDate, IsString } from 'class-validator';
 import { ScheduleDayConfigForUpdateDto } from './scheduleDayForUpdateDto.dto';
 
 export class ScheduleForUpdateDto {
+  @ApiProperty({
+    description: 'Schedule id',
+    example: 1,
+  })
+  @IsNumber()
+  @IsPositive()
   id: number;
+
   @ApiProperty({
     description: 'List of schedule days',
     type: [ScheduleDayConfigForUpdateDto],
   })
-  @IsArray()
+  @IsArray() 
+  @IsNotEmpty({ message: 'scheduleDays should not be empty' }) 
+  @ValidateNested({ each: true }) 
+  @Type(() => ScheduleDayConfigForUpdateDto) 
   scheduleDays: ScheduleDayConfigForUpdateDto[];
 }

@@ -9,9 +9,8 @@ import { TimeService } from 'src/common/time/time.service';
 import { DateTime } from 'luxon';
 import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 import { ScheduleDayConfigService } from './schedule-day-config.service';
-import { EDayOfWeek, Prisma, Schedule, ScheduleDayConfig } from '@prisma/client';
+import { EDayOfWeek, Schedule} from '@prisma/client';
 import { ScheduleResponse } from '../dtos/schedule.response';
-import { scheduled } from 'rxjs';
 
 @Injectable()
 export class SchedulesService {
@@ -43,6 +42,17 @@ export class SchedulesService {
     return this.scheduleToFullResponse(scheduleFound);
   }
 
+  async updateConfig(request: ScheduleForUpdateDto) {
+    const scheduleFound = await this.findFullById(request.id);
+
+    if (!scheduleFound)
+      throw new NotFoundException(`Agenda con id ${request.id} no encontrada`);
+
+    for (const day of request.scheduleDays) {
+      await this._schedulesDayConfig.updateDayConfig(day);
+    }
+  }
+
   async findFullById(id: number) {
     return await this._prisma.schedule.findUnique({
       where: {
@@ -57,18 +67,6 @@ export class SchedulesService {
         appointments: true
       },
     });
-  }
-
-  async updateConfig(request: ScheduleForUpdateDto) {
-    const scheduleFound = await this.findFullById(request.id);
-
-    if (!scheduleFound)
-      throw new NotFoundException(`Agenda con id ${request.id} no encontrada`);
-
-    const selectedDaysOfWeek = scheduleFound.scheduleDays.map(
-      (scheduleDay) => scheduleDay.day,
-    );
-    const uniqueDaysOfWeek = [...new Set(selectedDaysOfWeek)];
   }
 
   async scheduleToFullResponse(schedule: Schedule):Promise<ScheduleResponse>{

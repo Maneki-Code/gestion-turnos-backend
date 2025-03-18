@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { $Enums, EDayOfWeek, Schedule, ScheduleDayConfig } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {  EDayOfWeek, ScheduleDayConfig } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { ScheduleDayRestConfigService } from './schedule-day-rest-config.service';
 import { ScheduleDayConfigResponse } from '../dtos/scheduleDayConfig.response';
+import { ScheduleDayConfigForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
 
 @Injectable()
 export class ScheduleDayConfigService {
@@ -27,7 +28,7 @@ export class ScheduleDayConfigService {
     })
 
     if(!createdScheduleDay) throw new BadRequestException(`Algo salió mal al crear el día ${day} asociada a la agenda.`);
-    await this._rest.create(createdScheduleDay.id);
+    await this._rest.create(createdScheduleDay.id, '12:00', '13:00');
   }
 
   async findAllSchedulesByScheduleId(id: number): Promise<ScheduleDayConfig[]> {
@@ -36,6 +37,67 @@ export class ScheduleDayConfigService {
         scheduleId: id
       }
     })
+  }
+
+  async findDayById(id: number):Promise<ScheduleDayConfig | null>{
+    return await this._prisma.scheduleDayConfig.findUnique({
+      where: {
+        id
+      }
+    })
+  }
+
+  async updateDayConfig(day: ScheduleDayConfigForUpdateDto) {
+    const dayFound = await this.findDayById(day.id);
+
+    if(!dayFound) throw new NotFoundException(`Día con id: ${day.id} no encontrado`)
+
+    /* Verificar si existen turnos en ese horario */
+
+    this.validateScheduleDay(day, dayFound);
+
+    for(const rest of day.rests){
+      if(rest.id!==undefined){
+        await this._rest.update(rest);
+      }else{
+        await this._rest.create(dayFound.id, rest.startRest, rest.endRest);
+      }
+    }
+
+    const updatedDay = await this._prisma.$transaction(async (tx) => {
+      const updatedScheduleDay = await tx.scheduleDayConfig.update({
+        where: { id: day.id },
+        data: {
+          startTime: day.startTime ?? dayFound.startTime,
+          endTime: day.endTime ?? dayFound.endTime,
+          slotInterval: day.slotInterval ?? dayFound.slotInterval,
+          status: day.status ?? dayFound.status,
+        },
+      });
+      return updatedScheduleDay;
+    });
+  }
+
+  validateScheduleDay(newDay: ScheduleDayConfigForUpdateDto, day: ScheduleDayConfig) {
+    const startTime = newDay.startTime ?? day.startTime;
+    const endTime = newDay.endTime ?? day.endTime;
+    const slotInterval = newDay.slotInterval ?? day.slotInterval;
+  
+    this._rest.validateRests(startTime, endTime, slotInterval, newDay.rests)
+
+    // Convertir a minutos usando timeToMinutes
+    const startMinutes = this._time.timeToMinutes(startTime);
+    const endMinutes = this._time.timeToMinutes(endTime);
+
+    // Validación de horarios
+    if (startMinutes > endMinutes) {
+        throw new BadRequestException('El horario de inicio no puede ser posterior al horario de fin');
+    }
+
+    if (endMinutes < startMinutes) {
+        throw new BadRequestException('El horario de fin no puede ser anterior al horario de inicio');
+    }
+
   }
 
   async scheduleDayToFullResponse(day: ScheduleDayConfig): Promise<ScheduleDayConfigResponse> {

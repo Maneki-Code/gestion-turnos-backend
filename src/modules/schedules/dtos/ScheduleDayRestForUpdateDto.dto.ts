@@ -1,8 +1,16 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, Matches } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsPositive, IsString, Matches } from 'class-validator';
 
 export class ScheduleDayRestForUpdateDto {
-  id?:number;
+  @ApiProperty({
+    description: 'Schedule day rest id',
+    example: 1,
+  })
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  id?: number;
+
   @ApiProperty({
     description: 'Start time of the rest period (HH:mm format)',
     example: '12:00',

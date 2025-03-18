@@ -73,4 +73,15 @@ export class TimeService {
     return endMinutes - startMinutes - totalRestMinutes;
   }
   
+  // método que convierte un time string en un DateTime de Luxon
+  convertTimeToLuxonDate(time: string): DateTime {
+    const isValidTime = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/.test(time);
+    if (!isValidTime) {
+      throw new BadRequestException('El formato de hora no es válido. Debe ser HH:mm');
+    }
+    
+    const [hours, minutes] = time.split(':').map(Number);
+    
+    return DateTime.fromObject({ hour: hours, minute: minutes }).setZone('America/Argentina/Buenos_Aires');
+  }
 }
