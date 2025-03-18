@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { EDayOfWeek } from '@prisma/client';
-import { IsArray, IsEnum, IsInt, IsString, Matches, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsString, Matches, Max, Min } from 'class-validator';
 import { ScheduleDayRestForUpdateDto } from './ScheduleDayRestForUpdateDto.dto';
 
-export class ScheduleDayForUpdateDto {
+export class ScheduleDayConfigForUpdateDto {
+  id: number;
   @ApiProperty({
     description: 'Start time of the schedule (HH:mm format)',
     example: '09:00',
@@ -35,14 +36,9 @@ export class ScheduleDayForUpdateDto {
   @Max(1440)
   slotInterval?: number;
   
-  @ApiProperty({
-    description: 'Day of the week',
-    example: 'MONDAY',
-    enum: EDayOfWeek,
-  })
-  @IsEnum(EDayOfWeek)
-  day: EDayOfWeek;
-  
+  @IsBoolean()
+  status?:boolean;
+
   @ApiProperty({
     description: 'List of rests',
   })

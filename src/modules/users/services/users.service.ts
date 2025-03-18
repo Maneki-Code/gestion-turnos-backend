@@ -4,10 +4,14 @@ import { promises } from 'dns';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { RegisterDto } from 'src/modules/auth/dtos/register.dto';
 import { UserResponse } from '../dtos/user.response';
+import { SchedulesService } from 'src/modules/schedules/services/schedules.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly _prisma: PrismaService) {}
+  constructor(
+    private readonly _prisma: PrismaService,
+    private readonly _schedules: SchedulesService
+  ) {}
 
   async create(request: RegisterDto): Promise<User> {
     if ((await this.findOneByEmail(request.email)) !== null)
@@ -20,15 +24,8 @@ export class UsersService {
       },
     });
     if (!createdUser) throw new BadRequestException(`Algo salió mal al crear el usuario.`);
-    const createdSchedule = await this._prisma.schedule.create({
-      data: {
-        description: "Horario predeterminado",
-        user: {
-          connect: { id: createdUser.id }  // Relaciona el usuario por su ID
-        }
-      }
-    });
-    if(!createdSchedule) throw new BadRequestException(`Algo salió mal al crear la agenda asociada al usuario.`);
+    
+    await this._schedules.create(createdUser.id);
 
     return createdUser;
   }
