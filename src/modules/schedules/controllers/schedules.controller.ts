@@ -5,6 +5,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ScheduleDayForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
+import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 
 @Controller('schedules')
 export class SchedulesController {
@@ -20,8 +21,8 @@ export class SchedulesController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch('update')
-  async updateSchedule(@Body() request: ScheduleDayForUpdateDto){
-
+  async updateSchedule(@Body() request: ScheduleForUpdateDto):Promise<void>{
+    await this._scheduleService.update(request);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

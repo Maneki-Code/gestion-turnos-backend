@@ -11,6 +11,9 @@ import { ScheduleDaysService } from './schedule-days.service';
 import { TimeService } from 'src/common/time/time.service';
 import { ScheduleDayForCreationDto } from '../dtos/scheduleDayForCreationDto.dto';
 import { DateTime } from 'luxon';
+import { ScheduleDayForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
+import { Schedule } from '@prisma/client';
+import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 
 @Injectable()
 export class SchedulesService {
@@ -20,6 +23,21 @@ export class SchedulesService {
     private readonly _userService: UsersService,
     private readonly _schedulesDayService: ScheduleDaysService,
   ) {}
+
+  async findUniqueFullById(id: number) {
+    return await this._prisma.schedule.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        scheduleDays: {
+          include: {
+            appointments: true,
+          },
+        },
+      },
+    });
+  }
 
   async create(request: ScheduleForCreationDto) {
     this.validateScheduleDayForCreationDtos(request.scheduleDays);
@@ -83,19 +101,41 @@ export class SchedulesService {
     }
   }
 
+  async update(request: ScheduleForUpdateDto) {
+    const scheduleFound = await this.findUniqueFullById(request.id);
+
+    if (!scheduleFound)
+      throw new NotFoundException(`Agenda con id ${request.id} no encontrada`);
+
+    /*Modificar fecha inicio y fin*/
+
+    const selectedDaysOfWeek = scheduleFound.scheduleDays.map(
+      (scheduleDay) => scheduleDay.day,
+    );
+
+    const uniqueDaysOfWeek = [...new Set(selectedDaysOfWeek)];
+
+    if (request.startDate) {
+      const newStartDate = this._time.convertToDate(request.startDate, '00:00');
+
+      if (newStartDate < this._time.convertToDate(new Date(), '00:00'))
+        throw new BadRequestException(
+          'La fecha de inicio no puede ser anterior a la actual.',
+        );
+
+      if (newStartDate < scheduleFound.startDate) {
+        while (newStartDate < scheduleFound.startDate) {
+          const dayofWeek = this._time.getDayOfWeek(newStartDate);
+          const scheduleDay = uniqueDaysOfWeek.find(day => day === dayofWeek);
+          if(scheduleDay){}
+          newStartDate.plus({ day: 1 });
+        }
+      }
+    }
+  }
+
   async delete(id: number): Promise<void> {
-    const scheduleFound = await this._prisma.schedule.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        scheduleDays: {
-          include: {
-            appointments: true,
-          },
-        },
-      },
-    });
+    const scheduleFound = await this.findUniqueFullById(id);
 
     if (!scheduleFound)
       throw new NotFoundException(`Agenda con id ${id} no encontrada`);
@@ -111,10 +151,10 @@ export class SchedulesService {
     }
 
     await this._prisma.schedule.delete({
-      where:{
-        id
-      }
-    })
+      where: {
+        id,
+      },
+    });
   }
 
   private validateScheduleDayForCreationDtos(
