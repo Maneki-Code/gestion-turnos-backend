@@ -55,19 +55,33 @@ export class TimeService {
   public calculateAvailableMinutes(
     startTime: string,
     endTime: string,
-    startRest?: string,
-    endRest?: string,
+    rests: { start: string; end: string }[] = []
   ): number {
     const startMinutes = this.timeToMinutes(startTime);
     const endMinutes = this.timeToMinutes(endTime);
-
-    if (startRest && endRest) {
-      const startRestMinutes = this.timeToMinutes(startRest);
-      const endRestMinutes = this.timeToMinutes(endRest);
-
-      return endMinutes - startMinutes - (endRestMinutes - startRestMinutes);
+    
+    let totalRestMinutes = 0;
+  
+    for (const rest of rests) {
+      if (rest.start && rest.end) {
+        const startRestMinutes = this.timeToMinutes(rest.start);
+        const endRestMinutes = this.timeToMinutes(rest.end);
+        totalRestMinutes += (endRestMinutes - startRestMinutes);
+      }
     }
-
-    return endMinutes - startMinutes;
+  
+    return endMinutes - startMinutes - totalRestMinutes;
+  }
+  
+  // método que convierte un time string en un DateTime de Luxon
+  convertTimeToLuxonDate(time: string): DateTime {
+    const isValidTime = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/.test(time);
+    if (!isValidTime) {
+      throw new BadRequestException('El formato de hora no es válido. Debe ser HH:mm');
+    }
+    
+    const [hours, minutes] = time.split(':').map(Number);
+    
+    return DateTime.fromObject({ hour: hours, minute: minutes }).setZone('America/Argentina/Buenos_Aires');
   }
 }
