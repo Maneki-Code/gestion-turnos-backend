@@ -7,6 +7,6 @@ export class ScheduleDaysController {
 
   @Get(':id')
   async findScheduleById(@Param('id') id:number) {
-    return this._scheduleDaysService.findOneById(id);
+    /* return this._scheduleDaysService.findOneById(id); */
   }
 }

@@ -11,12 +11,12 @@ import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 export class SchedulesController {
   constructor(private _scheduleService:SchedulesService){}
 
-  @UseGuards(AuthGuard, RolesGuard)
+  /* @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Post()
   async createSchedule(@Body() request:ScheduleForCreationDto){
     return await this._scheduleService.create(request);
-  }
+  } */
   
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')

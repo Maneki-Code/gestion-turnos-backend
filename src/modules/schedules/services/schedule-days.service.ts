@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Appointment, EDayOfWeek, ScheduleDay } from '@prisma/client';
+import { Appointment, EDayOfWeek, } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { AppointmentsService } from 'src/modules/appointments/services/appointments.service';
@@ -21,7 +21,7 @@ export class ScheduleDaysService {
   ) {}
 
   async create(scheduleId: number, date: Date, request: ScheduleDayForCreationDto) {
-    const createdScheduleDay = await this._prisma.scheduleDay.create({
+    /* const createdScheduleDay = await this._prisma.scheduleDay.create({
       data: {
         scheduleId: scheduleId,
         startTime: request.startTime,
@@ -62,11 +62,11 @@ export class ScheduleDaysService {
         currentTime = this._time.addInterval(currentTime, request.slotInterval);
         endCurrentTime = this._time.addInterval(endCurrentTime, request.slotInterval);
       }
-    }
+    } */
   }
   
 
-  async findOneById(id:number):Promise<ScheduleDayResponse> {
+/*   async findOneById(id:number):Promise<ScheduleDayResponse> {
     const response = await this._prisma.scheduleDay.findUnique({
       where:{
         id
@@ -79,10 +79,10 @@ export class ScheduleDaysService {
     if(!response) throw new NotFoundException('No se encontró la agenda del día');
 
     return this.parseScheduleDayToResponseFull(response, response.appointments);
-  }
+  } */
 
   async findAllBetweenDatesByUser(email: string, startDate: Date, endDate: Date){
-    return await this._prisma.scheduleDay.findMany({
+/*     return await this._prisma.scheduleDay.findMany({
       where: {
         date: {
           gte: startDate, 
@@ -97,12 +97,12 @@ export class ScheduleDaysService {
       include:{
         appointments:true
       }
-    });
+    }); */
   }
 
 
 
-  parseScheduleDayToResponseFull(scheduleDay: ScheduleDay, appointments:Appointment[]): ScheduleDayResponse{
+/*   parseScheduleDayToResponseFull(scheduleDay: ScheduleDay, appointments:Appointment[]): ScheduleDayResponse{
     return {
         id: scheduleDay.id,
         day: scheduleDay.day,
@@ -112,5 +112,5 @@ export class ScheduleDaysService {
         slotInterval: scheduleDay.slotInterval,
         appointments: appointments.map( appointment => this._appointmentsService.parseAppointmentToResponse(appointment))
     }
-  }
+  } */
 }

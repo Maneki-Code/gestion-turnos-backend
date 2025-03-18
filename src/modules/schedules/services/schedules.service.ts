@@ -11,9 +11,8 @@ import { ScheduleDaysService } from './schedule-days.service';
 import { TimeService } from 'src/common/time/time.service';
 import { ScheduleDayForCreationDto } from '../dtos/scheduleDayForCreationDto.dto';
 import { DateTime } from 'luxon';
-import { ScheduleDayForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
-import { Schedule } from '@prisma/client';
 import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class SchedulesService {
@@ -25,7 +24,7 @@ export class SchedulesService {
   ) {}
 
   async findUniqueFullById(id: number) {
-    return await this._prisma.schedule.findUnique({
+    /* return await this._prisma.schedule.findUnique({
       where: {
         id,
       },
@@ -36,46 +35,11 @@ export class SchedulesService {
           },
         },
       },
-    });
+    }); */
   }
 
-  async create(request: ScheduleForCreationDto) {
-    this.validateScheduleDayForCreationDtos(request.scheduleDays);
-    const userFound = await this._userService.findOneByEmail(request.userEmail);
-    if (userFound === null)
-      throw new NotFoundException(
-        `El usuario con email '${request.userEmail} no existe`,
-      );
-    await this.validateNoOverlappingAppointments(request);
-
-    const createdSchedule = await this._prisma.schedule.create({
-      data: {
-        userId: userFound.id,
-        startDate: request.startDate,
-        endDate: request.endDate,
-        description: request.description,
-      },
-    });
-
-    await this.createScheduleDays(
-      createdSchedule.id,
-      request.startDate,
-      request.endDate,
-      request.scheduleDays,
-    );
-
-    return await this._prisma.schedule.findUnique({
-      where: {
-        id: createdSchedule.id,
-      },
-      include: {
-        scheduleDays: {
-          include: {
-            appointments: true,
-          },
-        },
-      },
-    });
+  async create(User: User) {
+    
   }
 
   private async createScheduleDays(
@@ -84,7 +48,7 @@ export class SchedulesService {
     endDate: Date,
     scheduleDays: ScheduleDayForCreationDto[],
   ) {
-    let currentDate = new Date(startDate);
+    /* let currentDate = new Date(startDate);
 
     while (currentDate <= endDate) {
       const dayOfWeek = this._time.getDayOfWeek(currentDate);
@@ -98,16 +62,14 @@ export class SchedulesService {
         );
       }
       currentDate.setDate(currentDate.getDate() + 1);
-    }
+    } */
   }
 
   async update(request: ScheduleForUpdateDto) {
-    const scheduleFound = await this.findUniqueFullById(request.id);
+    /* const scheduleFound = await this.findUniqueFullById(request.id);
 
     if (!scheduleFound)
       throw new NotFoundException(`Agenda con id ${request.id} no encontrada`);
-
-    /*Modificar fecha inicio y fin*/
 
     const selectedDaysOfWeek = scheduleFound.scheduleDays.map(
       (scheduleDay) => scheduleDay.day,
@@ -131,11 +93,11 @@ export class SchedulesService {
           newStartDate.plus({ day: 1 });
         }
       }
-    }
+    } */
   }
 
   async delete(id: number): Promise<void> {
-    const scheduleFound = await this.findUniqueFullById(id);
+    /* const scheduleFound = await this.findUniqueFullById(id);
 
     if (!scheduleFound)
       throw new NotFoundException(`Agenda con id ${id} no encontrada`);
@@ -154,13 +116,13 @@ export class SchedulesService {
       where: {
         id,
       },
-    });
+    }); */
   }
 
   private validateScheduleDayForCreationDtos(
     days: ScheduleDayForCreationDto[],
   ) {
-    for (const scheduleDay of days) {
+    /* for (const scheduleDay of days) {
       if (scheduleDay.startTime >= scheduleDay.endTime) {
         throw new BadRequestException(
           `El horario de inicio debe ser menor que el de fin para el día ${scheduleDay.day}.`,
@@ -201,13 +163,13 @@ export class SchedulesService {
           `El slotInterval (${scheduleDay.slotInterval} min) no encaja exactamente en el horario disponible para el día ${scheduleDay.day}.`,
         );
       }
-    }
+    } */
   }
 
   private async validateNoOverlappingAppointments(
     request: ScheduleForCreationDto,
   ) {
-    const startDate = request.startDate;
+   /*  const startDate = request.startDate;
     const endDate = request.endDate;
 
     const scheduleDays =
@@ -256,6 +218,6 @@ export class SchedulesService {
         }
         currentDate.setDate(currentDate.getDate() + 1);
       }
-    });
+    }); */
   }
 }
