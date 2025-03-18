@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { SchedulesService } from '../services/schedules.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -9,12 +9,12 @@ import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 export class SchedulesController {
   constructor(private _scheduleService:SchedulesService){}
 
-  /* @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @Post()
-  async createSchedule(@Body() request:ScheduleForCreationDto){
-    return await this._scheduleService.create(request);
-  } */
+  @Get('/:id')
+  async findById(@Param('id') id: number){
+    return await this._scheduleService.findFullResponseById(id);
+  } 
   
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
