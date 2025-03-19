@@ -8,7 +8,7 @@ export class AppointmentsService {
   constructor(private readonly _prisma: PrismaService) {}
 
   async create(scheduleDayId:number, startTime:Date, endCurrentTime:Date){
-    const createdAppointment = await this._prisma.appointment.create({
+    /* const createdAppointment = await this._prisma.appointment.create({
       data:{
         scheduleDayId: scheduleDayId,
         startTime:startTime.toString(),
@@ -16,10 +16,10 @@ export class AppointmentsService {
         status: AppointmentStatus.AVAILABLE,
         description: 'Turno disponible'
       }
-    })
+    }) */
   }
 
-  parseAppointmentToResponse(appointment: Appointment): AppointmentResponse{
+  /* parseAppointmentToResponse(appointment: Appointment): AppointmentResponse{
     return {
       id: appointment.id,
       startTime: appointment.startTime,
@@ -28,5 +28,5 @@ export class AppointmentsService {
       status: appointment.status,
       customerId: appointment.customerId ?? null
     }
-  }
+  } */
 }
