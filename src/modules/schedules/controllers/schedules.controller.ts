@@ -11,9 +11,9 @@ export class SchedulesController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @Get('/:id')
-  async findById(@Param('id') id: number){
-    return await this._scheduleService.findFullResponseById(id);
+  @Get('/:email')
+  async findById(@Param('email') email: string){
+    return await this._scheduleService.findFullResponseById(email);
   } 
   
   @UseGuards(AuthGuard, RolesGuard)
