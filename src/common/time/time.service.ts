@@ -34,19 +34,19 @@ export class TimeService {
     const dayOfWeek = date.getDay();
     switch (dayOfWeek) {
       case 0:
-        return EDayOfWeek.SUNDAY;
+        return EDayOfWeek.LUNES;
       case 1:
-        return EDayOfWeek.MONDAY;
+        return EDayOfWeek.MARTES;
       case 2:
-        return EDayOfWeek.TUESDAY;
+        return EDayOfWeek.MIÉRCOLES;
       case 3:
-        return EDayOfWeek.WEDNESDAY;
+        return EDayOfWeek.JUEVES;
       case 4:
-        return EDayOfWeek.THURSDAY;
+        return EDayOfWeek.VIERNES;
       case 5:
-        return EDayOfWeek.FRIDAY;
+        return EDayOfWeek.SÁBADO;
       case 6:
-        return EDayOfWeek.SATURDAY;
+        return EDayOfWeek.DOMINGO;
       default:
         throw new Error('Invalid day of the week');
     }
