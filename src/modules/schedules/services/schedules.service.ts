@@ -33,6 +33,28 @@ export class SchedulesService {
     }
   }
 
+
+  async findByIdToUpdate(email: string) {
+    const schedule = await this._prisma.schedule.findFirst({
+      where: {
+        user: {
+          email
+        }
+      }
+    });
+
+    if(!schedule) throw new NotFoundException(`Agenda no encontrada para el usuario con email ${email}`);
+
+    const scheduleToUpdateConst = await this.findFullById(schedule.id);
+    console.log(scheduleToUpdateConst); 
+    
+    if (!scheduleToUpdateConst) {
+      throw new NotFoundException('Schedule not found');
+    }
+    return await this.scheduleToUpdateResponse(scheduleToUpdateConst);
+
+  }
+
   async findFullResponseById(email:string):Promise<ScheduleResponse>{
 
     const schedule = await this._prisma.schedule.findFirst({
@@ -56,6 +78,8 @@ export class SchedulesService {
   }
 
   async updateConfig(request: ScheduleForUpdateDto) {
+    console.log(request.id);
+    console.log(request.scheduleDays);
     const scheduleFound = await this.findFullById(request.id);
 
     if (!scheduleFound)
@@ -93,4 +117,13 @@ export class SchedulesService {
       daysConfig: daysConfig
     }
   }
+
+  async scheduleToUpdateResponse(schedule: Schedule):Promise<ScheduleForUpdateDto>{
+    const scheduleDays = await this._schedulesDayConfig.findAllSchedulesByScheduleId(schedule.id);
+    return {
+      id: schedule.id,
+      scheduleDays: await Promise.all(scheduleDays.map(day => this._schedulesDayConfig.scheduleDayToScheduleDayForUpdate(day)))
+    }
+  }
+
 }

@@ -57,7 +57,7 @@ export class ScheduleDayConfigService {
     this.validateScheduleDay(day, dayFound);
 
     for(const rest of day.rests){
-      if(rest.id!==undefined){
+      if(rest.id!=null){
         await this._rest.update(rest);
       }else{
         await this._rest.create(dayFound.id, rest.startRest, rest.endRest);
@@ -113,4 +113,18 @@ export class ScheduleDayConfigService {
       rests: rests.map(rest => this._rest.restToFullResponse(rest))
     }
   }
+
+  async scheduleDayToScheduleDayForUpdate(day: ScheduleDayConfig): Promise<ScheduleDayConfigForUpdateDto> {
+    const rests = await this._rest.findAllRestsByScheduleDayConfigId(day.id);
+    return {
+      id: day.id,
+      day: day.day,
+      startTime: day.startTime,
+      endTime: day.endTime,
+      slotInterval: day.slotInterval,
+      status: day.status,
+      rests: rests.map(rest => this._rest.restToScheduleDayRestForUpdate(rest))
+    }
+  }
+
 }
