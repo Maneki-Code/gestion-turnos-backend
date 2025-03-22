@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import {  EDayOfWeek, ScheduleDayConfig } from '@prisma/client';
+import {  EDayOfWeek, ScheduleDayConfig, ScheduleDayRestConfig } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { ScheduleDayRestConfigService } from './schedule-day-rest-config.service';
 import { ScheduleDayConfigResponse } from '../dtos/scheduleDayConfig.response';
 import { ScheduleDayConfigForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
+import { ScheduleDayRestForUpdateDto } from '../dtos/ScheduleDayRestForUpdateDto.dto';
 
 @Injectable()
 export class ScheduleDayConfigService {
@@ -56,6 +57,10 @@ export class ScheduleDayConfigService {
 
     this.validateScheduleDay(day, dayFound);
 
+    const currentDbRests = await this._rest.findAllRestsByScheduleDayConfigId(dayFound.id);
+
+    await this.deleteOrphans(day.rests, currentDbRests);
+
     for(const rest of day.rests){
       if(rest.id!=null){
         await this._rest.update(rest);
@@ -76,6 +81,14 @@ export class ScheduleDayConfigService {
       });
       return updatedScheduleDay;
     });
+  }
+
+  async deleteOrphans(req: ScheduleDayRestForUpdateDto[], currentDbRests: ScheduleDayRestConfig[]): Promise<void>{
+    for(const rest of currentDbRests){
+      const existsInReq = req.some(r => r.id === rest.id);
+      if(!existsInReq)
+        await this._rest.deleteById(rest.id);
+    }
   }
 
   validateScheduleDay(newDay: ScheduleDayConfigForUpdateDto, day: ScheduleDayConfig) {
