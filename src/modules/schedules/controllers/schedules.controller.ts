@@ -15,7 +15,14 @@ export class SchedulesController {
   async findById(@Param('email') email: string){
     return await this._scheduleService.findFullResponseById(email);
   } 
-  
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Get('/:email/updateResponse')
+  async findByIdToUpdate(@Param('email') email: string){
+    return await this._scheduleService.findByIdToUpdate(email);
+  } 
+
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch('update-config')

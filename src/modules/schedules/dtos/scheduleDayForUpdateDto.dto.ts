@@ -15,6 +15,15 @@ import { ScheduleDayRestForUpdateDto } from './ScheduleDayRestForUpdateDto.dto';
 import { Type } from 'class-transformer';
 
 export class ScheduleDayConfigForUpdateDto {
+
+  @ApiProperty({
+    description: 'Schedule day enum',
+    example: 'LUNES',
+  })
+  @IsString()
+  day:string;
+
+
   @ApiProperty({
     description: 'Schedule day id',
     example: 1,

@@ -106,4 +106,12 @@ export class ScheduleDayRestConfigService {
       endTime: rest.endTime
     }
   }
+
+  restToScheduleDayRestForUpdate(rest: ScheduleDayRestConfig): ScheduleDayRestForUpdateDto {
+    return {
+      id: rest.id,
+      startRest: rest.startTime,
+      endRest: rest.endTime
+    }
+  }
 }
