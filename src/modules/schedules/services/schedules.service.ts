@@ -9,72 +9,87 @@ import { TimeService } from 'src/common/time/time.service';
 import { DateTime } from 'luxon';
 import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 import { ScheduleDayConfigService } from './schedule-day-config.service';
-import { EDayOfWeek, Schedule} from '@prisma/client';
+import { EDayOfWeek, Schedule } from '@prisma/client';
 import { ScheduleResponse } from '../dtos/schedule.response';
+import { ScheduleMapper } from '../mappers/schedule-mapper.mapper';
 
 @Injectable()
 export class SchedulesService {
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _time: TimeService,
-    private readonly _schedulesDayConfig: ScheduleDayConfigService
+    private readonly _schedulesDayConfig: ScheduleDayConfigService,
+    private readonly _mapper: ScheduleMapper,
   ) {}
 
-  async create(userId:number):Promise<void> {
+  async create(userId: number): Promise<void> {
     const createdSchedule = await this._prisma.schedule.create({
       data: {
-        userId: userId
-      }
+        userId: userId,
+      },
     });
-    if(!createdSchedule) throw new BadRequestException(`Algo salió mal al crear la agenda asociada al usuario.`);
+    if (!createdSchedule)
+      throw new BadRequestException(
+        `Algo salió mal al crear la agenda asociada al usuario.`,
+      );
 
     for (const day of Object.values(EDayOfWeek)) {
       await this._schedulesDayConfig.create(createdSchedule.id, day);
     }
   }
 
-
-  async findByIdToUpdate(email: string) {
+  async findByEmailConfigResponse(email: string) {
     const schedule = await this._prisma.schedule.findFirst({
       where: {
         user: {
-          email
-        }
-      }
+          email,
+        },
+      },
+      include: {
+        scheduleDays: {
+          include: {
+            rests: true,
+          },
+        },
+        appointments: true,
+      },
     });
 
-    if(!schedule) throw new NotFoundException(`Agenda no encontrada para el usuario con email ${email}`);
+    if (!schedule)
+      throw new NotFoundException(
+        `Agenda no encontrada para el usuario con email ${email}`,
+      );
 
-    const scheduleToUpdateConst = await this.findFullById(schedule.id);
-    console.log(scheduleToUpdateConst); 
-    
-    if (!scheduleToUpdateConst) {
-      throw new NotFoundException('Schedule not found');
-    }
-    return await this.scheduleToUpdateResponse(scheduleToUpdateConst);
-
+    return await this._mapper.scheduleToConfigResponse(
+      schedule,
+      schedule.scheduleDays,
+    );
   }
 
-  async findFullResponseById(email:string):Promise<ScheduleResponse>{
-
+  async findByEmailFullResponse(email: string): Promise<ScheduleResponse> {
     const schedule = await this._prisma.schedule.findFirst({
       where: {
         user: {
-          email
-        }
-      }
+          email,
+        },
+      },
+      include: {
+        scheduleDays: {
+          include: {
+            rests: true,
+          },
+        },
+        appointments: true,
+      },
     });
-
-    if(!schedule) throw new NotFoundException(`Agenda no encontrada para el usuario con email ${email}`);
-
-    return await this.scheduleToFullResponse(schedule);
-
-    // const scheduleFound = await this.findFullById(id);
-
-    // if (!scheduleFound)
-    //   throw new NotFoundException(`Agenda con id ${id} no encontrada`);
-
-    // return this.scheduleToFullResponse(scheduleFound);
+    if (!schedule)
+      throw new NotFoundException(
+        `Agenda no encontrada para el usuario con email ${email}`,
+      );
+    return await this._mapper.scheduleToFullResponse(
+      schedule,
+      schedule.scheduleDays,
+    );
   }
 
   async updateConfig(request: ScheduleForUpdateDto) {
@@ -98,32 +113,11 @@ export class SchedulesService {
       include: {
         scheduleDays: {
           include: {
-            rests: true
+            rests: true,
           },
         },
-        appointments: true
+        appointments: true,
       },
     });
   }
-
-  async scheduleToFullResponse(schedule: Schedule):Promise<ScheduleResponse>{
-    const scheduleDays = await this._schedulesDayConfig.findAllSchedulesByScheduleId(schedule.id);
-    const daysConfig = await Promise.all(
-      scheduleDays.map(day => this._schedulesDayConfig.scheduleDayToFullResponse(day))
-    );
-    return {
-      id: schedule.id,
-      appointments: [],
-      daysConfig: daysConfig
-    }
-  }
-
-  async scheduleToUpdateResponse(schedule: Schedule):Promise<ScheduleForUpdateDto>{
-    const scheduleDays = await this._schedulesDayConfig.findAllSchedulesByScheduleId(schedule.id);
-    return {
-      id: schedule.id,
-      scheduleDays: await Promise.all(scheduleDays.map(day => this._schedulesDayConfig.scheduleDayToScheduleDayForUpdate(day)))
-    }
-  }
-
 }

@@ -61,9 +61,9 @@ export class ScheduleDayRestConfigService {
   async deleteById(id: number) {
     await this._prisma.scheduleDayRestConfig.delete({
       where: {
-        id:id
-      }
-    })
+        id: id,
+      },
+    });
   }
 
   validateRests(
@@ -72,17 +72,14 @@ export class ScheduleDayRestConfigService {
     interval: number,
     rests: ScheduleDayRestForUpdateDto[],
   ) {
-    // Convertir el startTime, endTime y cada descanso a minutos
     const startMinutes = this._time.timeToMinutes(startTime);
     const endMinutes = this._time.timeToMinutes(endTime);
     const totalWorkMinutes = endMinutes - startMinutes;
 
-    // Verificar que los descansos no se solapen
     for (let i = 0; i < rests.length; i++) {
       const restStartMinutes = this._time.timeToMinutes(rests[i].startRest);
       const restEndMinutes = this._time.timeToMinutes(rests[i].endRest);
 
-      // Verificar que el descanso no se solape
       for (let j = i + 1; j < rests.length; j++) {
         const otherRestStartMinutes = this._time.timeToMinutes(
           rests[j].startRest,
@@ -97,7 +94,6 @@ export class ScheduleDayRestConfigService {
         }
       }
 
-      // Verificar que el descanso no sea más corto que el inicio
       if (restStartMinutes >= restEndMinutes) {
         throw new BadRequestException(
           'El horario de inicio de descanso no puede ser posterior al horario de fin',
@@ -120,24 +116,6 @@ export class ScheduleDayRestConfigService {
       throw new BadRequestException(
         'El tiempo total de trabajo no se ajusta al intervalo de tiempo definido',
       );
-    }
-  }
-
-  restToFullResponse(
-    rest: ScheduleDayRestConfig,
-  ): ScheduleDayRestConfigResponse {
-    return {
-      id: rest.id,
-      startTime: rest.startTime,
-      endTime: rest.endTime,
-    };
-  }
-
-  restToScheduleDayRestForUpdate(rest: ScheduleDayRestConfig): ScheduleDayRestForUpdateDto {
-    return {
-      id: rest.id,
-      startRest: rest.startTime,
-      endRest: rest.endTime
     }
   }
 }

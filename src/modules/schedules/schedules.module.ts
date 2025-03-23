@@ -7,10 +7,11 @@ import { AppointmentsModule } from '../appointments/appointments.module';
 import { TimeService } from 'src/common/time/time.service';
 import { ScheduleDayConfigService } from './services/schedule-day-config.service';
 import { ScheduleDayRestConfigService } from './services/schedule-day-rest-config.service';
+import { ScheduleMapper } from './mappers/schedule-mapper.mapper';
 
 @Module({
   imports: [AppointmentsModule],
-  providers: [JwtService, PrismaService, TimeService, SchedulesService, ScheduleDayConfigService, ScheduleDayRestConfigService],
+  providers: [JwtService, PrismaService, ScheduleMapper, TimeService, SchedulesService, ScheduleDayConfigService, ScheduleDayRestConfigService],
   controllers: [SchedulesController],
   exports: [SchedulesService]
 })
