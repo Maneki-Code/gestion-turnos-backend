@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { promises } from 'dns';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { RegisterDto } from 'src/modules/auth/dtos/register.dto';
 import { UserResponse } from '../dtos/user.response';

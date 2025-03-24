@@ -8,6 +8,8 @@ import {
 import { ScheduleResponse } from '../dtos/schedule.response';
 import { ScheduleDayConfigResponse } from '../dtos/scheduleDayConfig.response';
 import { ScheduleDayRestConfigResponse } from '../dtos/scheduleDayRestConfig.response';
+import { ScheduleConfigResponse } from '../dtos/scheduleconfig.response';
+
 
 @Injectable()
 export class ScheduleMapper {
@@ -28,7 +30,7 @@ export class ScheduleMapper {
   async scheduleToConfigResponse(
     schedule: Schedule,
     days: (ScheduleDayConfig & { rests: ScheduleDayRestConfig[] })[],
-  ) {
+  ): Promise<ScheduleConfigResponse>{
     const daysConfig = await Promise.all(
       days.map((day) => this.scheduleDayToFullResponse(day)),
     );

@@ -99,7 +99,6 @@ export class ScheduleDayRestConfigService {
       }
     }
 
-    // Calcular el tiempo total de descanso
     let totalRestMinutes = 0;
     for (const rest of rests) {
       const restStartMinutes = this._time.timeToMinutes(rest.startRest);
@@ -107,7 +106,6 @@ export class ScheduleDayRestConfigService {
       totalRestMinutes += restEndMinutes - restStartMinutes;
     }
 
-    // Verificar si el tiempo de trabajo se ajusta al intervalo
     const availableWorkMinutes = totalWorkMinutes - totalRestMinutes;
 
     if (availableWorkMinutes % interval !== 0) {
