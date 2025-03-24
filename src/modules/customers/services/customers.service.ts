@@ -11,12 +11,15 @@ import { CustomerForCreationDto } from '../dtos/customerForCreationDto.dto';
 export class CustomersService {
   constructor(private readonly _prisma: PrismaService) {}
 
-  async create(request: CustomerForCreationDto): Promise<void> {
-    const customerFound = this.findByPhoneNumber(request.phoneNumber);
+  async create(request: CustomerForCreationDto): Promise<Customer> {
+    const customerFound = await this.findByPhoneNumber(request.phoneNumber);
+    
     if (customerFound !== null)
       throw new ConflictException(`El número de teléfono ${request.phoneNumber} ya está asociado a un cliente`,);
-
-    const customerCreated = this._prisma.customer.create({
+    
+    console.log("Holaaaa");
+    
+    const customerCreated = await this._prisma.customer.create({
       data: {
         firstName: request.firstName,
         lastName: request.lastName,
@@ -27,6 +30,7 @@ export class CustomersService {
 
     if (!customerCreated)
       throw new BadRequestException(`Algo salió mal al registrar el cliente.`);
+    return customerCreated;
   }
 
   async findByPhoneNumber(phoneNumber: string): Promise<Customer | null> {

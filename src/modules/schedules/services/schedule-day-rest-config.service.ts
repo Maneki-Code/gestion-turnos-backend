@@ -1,10 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ScheduleDayConfig, ScheduleDayRestConfig } from '@prisma/client';
+import { ScheduleDayRestConfig } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
-import { ScheduleDayRestConfigResponse } from '../dtos/scheduleDayRestConfig.response';
 import { ScheduleDayRestForUpdateDto } from '../dtos/ScheduleDayRestForUpdateDto.dto';
-import { start } from 'repl';
 
 @Injectable()
 export class ScheduleDayRestConfigService {

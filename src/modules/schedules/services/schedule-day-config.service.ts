@@ -11,7 +11,6 @@ import {
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { ScheduleDayRestConfigService } from './schedule-day-rest-config.service';
-import { ScheduleDayConfigResponse } from '../dtos/scheduleDayConfig.response';
 import { ScheduleDayConfigForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
 import { ScheduleDayRestForUpdateDto } from '../dtos/ScheduleDayRestForUpdateDto.dto';
 

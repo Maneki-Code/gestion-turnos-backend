@@ -1,15 +1,12 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
-import { TimeService } from 'src/common/time/time.service';
-import { DateTime } from 'luxon';
 import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 import { ScheduleDayConfigService } from './schedule-day-config.service';
-import { EDayOfWeek, Schedule } from '@prisma/client';
+import { EDayOfWeek} from '@prisma/client';
 import { ScheduleResponse } from '../dtos/schedule.response';
 import { ScheduleMapper } from '../mappers/schedule-mapper.mapper';
 
@@ -17,7 +14,6 @@ import { ScheduleMapper } from '../mappers/schedule-mapper.mapper';
 export class SchedulesService {
   constructor(
     private readonly _prisma: PrismaService,
-    private readonly _time: TimeService,
     private readonly _schedulesDayConfig: ScheduleDayConfigService,
     private readonly _mapper: ScheduleMapper,
   ) {}
@@ -120,4 +116,5 @@ export class SchedulesService {
       },
     });
   }
+
 }

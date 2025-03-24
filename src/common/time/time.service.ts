@@ -9,27 +9,6 @@ export class TimeService {
     return hours * 60 + minutes;
   }
 
-  parseStringToDate(date:string){
-    try{
-      const newDate = new Date(date);
-      return newDate;
-    }catch(error){
-      throw new BadRequestException('Formato de fecha inválido');
-    }
-  }
-
-  convertToDate(date: Date, time: string): DateTime {
-    const [hours, minutes] = time.split(':').map((part) => parseInt(part, 10));
-
-    return DateTime.fromJSDate(date)
-      .set({ hour: hours, minute: minutes, second: 0, millisecond: 0 })
-      .setZone('America/Argentina/Buenos_Aires', { keepLocalTime: true });
-  }
-
-  addInterval(currentTime: DateTime, interval: number): DateTime {
-    return currentTime.plus({ minutes: interval });
-  }
-
   getDayOfWeek(date: Date): EDayOfWeek {
     const dayOfWeek = date.getDay();
     switch (dayOfWeek) {
@@ -52,27 +31,6 @@ export class TimeService {
     }
   }
 
-  public calculateAvailableMinutes(
-    startTime: string,
-    endTime: string,
-    rests: { start: string; end: string }[] = []
-  ): number {
-    const startMinutes = this.timeToMinutes(startTime);
-    const endMinutes = this.timeToMinutes(endTime);
-    
-    let totalRestMinutes = 0;
-  
-    for (const rest of rests) {
-      if (rest.start && rest.end) {
-        const startRestMinutes = this.timeToMinutes(rest.start);
-        const endRestMinutes = this.timeToMinutes(rest.end);
-        totalRestMinutes += (endRestMinutes - startRestMinutes);
-      }
-    }
-  
-    return endMinutes - startMinutes - totalRestMinutes;
-  }
-  
   // método que convierte un time string en un DateTime de Luxon
   convertTimeToLuxonDate(time: string): DateTime {
     const isValidTime = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/.test(time);
