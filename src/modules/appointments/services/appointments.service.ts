@@ -23,24 +23,22 @@ export class AppointmentsService {
     }
 
     /*Validar disponibilidad de turno */
+    const appointmentDate = this._time.convertStringToDate(request.date);
 
-    
-
-    /* const appointmentCreated = await this._prisma.appointment.create({
+    const appointmentCreated = await this._prisma.appointment.create({
       data: {
         status: AppointmentStatus.RESERVADO,
         description: request.description ?? null,
         startTime: request.startTime,
         endTime: request.endTime,
-        date: request.date,
+        date: appointmentDate,
         customerId: customerFound.id,
         scheduleId: request.scheduleId,
       },
     }); 
 
     if (!appointmentCreated)
-      throw new BadRequestException(`Algo salió mal al crear la reserva.`);
-    */
+      throw new BadRequestException(`Algo salió mal al crear la reserva.`); 
   }
 
   async findByScheduleIdAndDateAndStartTimeAndEndTime(
@@ -59,7 +57,7 @@ export class AppointmentsService {
     });
   }
 
-  async validateAppointmentAvailability(request: AppointmentForCreationDto) {
+  /* async validateAppointmentAvailability(request: AppointmentForCreationDto) {
     const appointmentFound =
       await this.findByScheduleIdAndDateAndStartTimeAndEndTime(
         request.scheduleId,
@@ -95,5 +93,5 @@ export class AppointmentsService {
 
   private isTimeBetween(time: string, startTime: string, endTime: string): boolean {
     return time >= startTime && time <= endTime;
-  }
+  } */
 }

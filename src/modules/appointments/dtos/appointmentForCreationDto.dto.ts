@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsDateString,
   IsNotEmpty,
@@ -7,6 +8,7 @@ import {
   MaxLength,
   IsInt,
   IsObject,
+  Matches,
 } from 'class-validator';
 import { CustomerForCreationDto } from 'src/modules/customers/dtos/customerForCreationDto.dto';
 
@@ -30,13 +32,14 @@ export class AppointmentForCreationDto {
   endTime: string;
 
   @ApiProperty({
-    description: 'The date of the appointment',
+    description: 'The date of the appointment (YYYY-MM-DD)',
     example: '2025-03-25',
-    type: Date,
+    type: String,
   })
-  @IsDateString()
+  @IsString()
   @IsNotEmpty()
-  date: Date;
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Date must be in YYYY-MM-DD format' }) // Validación estricta
+  date: string;
 
   @ApiProperty({
     description: 'Description of the appointment',

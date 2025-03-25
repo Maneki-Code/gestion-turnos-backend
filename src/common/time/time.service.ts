@@ -42,4 +42,8 @@ export class TimeService {
     
     return DateTime.fromObject({ hour: hours, minute: minutes }).setZone('America/Argentina/Buenos_Aires');
   }
+
+  convertStringToDate(date: string){
+    return DateTime.fromFormat(date, 'yyyy-MM-dd', { zone: 'utc' }).toISO();
+  }
 }
