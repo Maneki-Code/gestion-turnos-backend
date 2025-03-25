@@ -17,8 +17,6 @@ export class CustomersService {
     if (customerFound !== null)
       throw new ConflictException(`El número de teléfono ${request.phoneNumber} ya está asociado a un cliente`,);
     
-    console.log("Holaaaa");
-    
     const customerCreated = await this._prisma.customer.create({
       data: {
         firstName: request.firstName,

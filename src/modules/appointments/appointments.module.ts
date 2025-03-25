@@ -5,9 +5,10 @@ import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { CustomersModule } from '../customers/customers.module';
 import { TimeService } from 'src/common/time/time.service';
 import { ValidationsModule } from 'src/common/validations/validations.module';
+import { MappersModule } from 'src/common/mappers/mappers.module';
 
 @Module({
-  imports: [CustomersModule, ValidationsModule],
+  imports: [ MappersModule, CustomersModule, ValidationsModule],
   providers: [TimeService, PrismaService, AppointmentsService],
   controllers: [AppointmentsController],
   exports:[AppointmentsService]

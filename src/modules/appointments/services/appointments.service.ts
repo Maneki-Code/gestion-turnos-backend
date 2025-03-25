@@ -2,17 +2,21 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { CustomersService } from 'src/modules/customers/services/customers.service';
 import { AppointmentForCreationDto } from '../dtos/appointmentForCreationDto.dto';
-import { Appointment, AppointmentStatus } from '@prisma/client';
+import { AppointmentStatus } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { AppointmentValidationService } from 'src/common/validations/services/appointment-validation.service';
+import { AppointmentResponse } from '../dtos/appointment.response';
+import { AppointmentMapperService } from 'src/common/mappers/services/appointment-mapper.service';
 
 @Injectable()
 export class AppointmentsService {
+  
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _customer: CustomersService,
     private readonly _time: TimeService,
-    private readonly _appointmentValidation:AppointmentValidationService
+    private readonly _appointmentValidation:AppointmentValidationService,
+    private readonly _appointmentMapper: AppointmentMapperService
   ) {}
 
   async create(request: AppointmentForCreationDto): Promise<void> {
@@ -45,4 +49,30 @@ export class AppointmentsService {
       throw new BadRequestException(`Algo salió mal al crear la reserva.`);  
   }
 
+  async findAllBetweenDates(id: number, startDate: string, endDate: string): Promise<AppointmentResponse[]> {
+    const start = this._time.convertStringToDate(startDate);
+    const end = this._time.convertStringToDate(endDate);
+
+    if (!start.isValid || !end.isValid) {
+      throw new BadRequestException("Fechas inválidas, usa el formato YYYY-MM-DD");
+    }
+
+    const appointments = await this._prisma.appointment.findMany({
+      where: {
+        scheduleId: id,
+        date: {
+          gte: start.toISO(),
+          lte: end.toISO(),
+        },
+      },
+      orderBy: {
+        date: "asc", 
+      },
+      include:{
+        customer: true
+      }
+    });
+
+    return appointments.map(appointment=> this._appointmentMapper.AppointmentToFullResponse(appointment))
+  }
 }
