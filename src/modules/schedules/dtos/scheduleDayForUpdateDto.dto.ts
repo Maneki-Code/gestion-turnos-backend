@@ -23,7 +23,6 @@ export class ScheduleDayConfigForUpdateDto {
   @IsString()
   day:string;
 
-
   @ApiProperty({
     description: 'Schedule day id',
     example: 1,
@@ -31,6 +30,7 @@ export class ScheduleDayConfigForUpdateDto {
   @IsNumber()
   @IsPositive()
   id: number;
+  
   @ApiProperty({
     description: 'Start time of the schedule (HH:mm format)',
     example: '09:00',

@@ -19,6 +19,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : { message: exception.message, code: status };
     }
 
+    console.log(exception);
+
     response.status(status).json({
       success: false,
       data: errorResponse,
