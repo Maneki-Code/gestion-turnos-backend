@@ -9,8 +9,8 @@ export class TimeService {
     return hours * 60 + minutes;
   }
 
-  getDayOfWeek(date: Date): EDayOfWeek {
-    const dayOfWeek = date.getDay();
+  getDayOfWeek(date: DateTime): EDayOfWeek {
+    const dayOfWeek = date.weekday;
     switch (dayOfWeek) {
       case 0:
         return EDayOfWeek.LUNES;
@@ -43,7 +43,7 @@ export class TimeService {
     return DateTime.fromObject({ hour: hours, minute: minutes }).setZone('America/Argentina/Buenos_Aires');
   }
 
-  convertStringToDate(date: string){
-    return DateTime.fromFormat(date, 'yyyy-MM-dd', { zone: 'utc' }).toISO();
+  convertStringToDate(date: string): DateTime {
+    return DateTime.fromFormat(date, 'yyyy-MM-dd', { zone: 'utc' }); // Devuelve un objeto DateTime
   }
 }
