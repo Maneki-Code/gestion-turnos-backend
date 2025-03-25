@@ -31,7 +31,6 @@ export class AuthService {
       const token = this.generateToken(user);
       this.setJwtCookie(response, token);
 
-
       return response.status(200).json({
         status: 200,
         message: 'Login successful',
