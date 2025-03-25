@@ -13,6 +13,7 @@ import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { ScheduleDayRestConfigService } from './schedule-day-rest-config.service';
 import { ScheduleDayConfigForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
 import { ScheduleDayRestForUpdateDto } from '../dtos/ScheduleDayRestForUpdateDto.dto';
+import { ScheduleValidationService } from 'src/common/validations/services/schedule-validation.service';
 
 @Injectable()
 export class ScheduleDayConfigService {
@@ -20,6 +21,7 @@ export class ScheduleDayConfigService {
     private readonly _prisma: PrismaService,
     private readonly _time: TimeService,
     private readonly _rest: ScheduleDayRestConfigService,
+    private readonly _scheduleValidations:ScheduleValidationService
   ) {}
 
   async create(scheduleId: number, day: EDayOfWeek) {
@@ -65,7 +67,7 @@ export class ScheduleDayConfigService {
 
     /* Verificar si existen turnos en ese horario */
 
-    this.validateScheduleDay(day, dayFound);
+    this._scheduleValidations.validateScheduleDay(day, dayFound);
 
     const currentDbRests = await this._rest.findAllRestsByScheduleDayConfigId(
       dayFound.id,
@@ -81,7 +83,7 @@ export class ScheduleDayConfigService {
       }
     }
 
-    const updatedDay = await this._prisma.$transaction(async (tx) => {
+    await this._prisma.$transaction(async (tx) => {
       const updatedScheduleDay = await tx.scheduleDayConfig.update({
         where: { id: day.id },
         data: {
@@ -105,29 +107,4 @@ export class ScheduleDayConfigService {
     }
   }
 
-  validateScheduleDay(
-    newDay: ScheduleDayConfigForUpdateDto,
-    day: ScheduleDayConfig,
-  ) {
-    const startTime = newDay.startTime ?? day.startTime;
-    const endTime = newDay.endTime ?? day.endTime;
-    const slotInterval = newDay.slotInterval ?? day.slotInterval;
-
-    this._rest.validateRests(startTime, endTime, slotInterval, newDay.rests);
-
-    const startMinutes = this._time.timeToMinutes(startTime);
-    const endMinutes = this._time.timeToMinutes(endTime);
-
-    if (startMinutes > endMinutes) {
-      throw new BadRequestException(
-        'El horario de inicio no puede ser posterior al horario de fin',
-      );
-    }
-
-    if (endMinutes < startMinutes) {
-      throw new BadRequestException(
-        'El horario de fin no puede ser anterior al horario de inicio',
-      );
-    }
-  }
 }
