@@ -8,14 +8,14 @@ import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
 import { ScheduleDayConfigService } from './schedule-day-config.service';
 import { EDayOfWeek} from '@prisma/client';
 import { ScheduleResponse } from '../dtos/schedule.response';
-import { ScheduleMapper } from '../mappers/schedule-mapper.mapper';
+import { ScheduleMapperService } from 'src/common/mappers/services/schedule-mapper.service';
 
 @Injectable()
 export class SchedulesService {
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _schedulesDayConfig: ScheduleDayConfigService,
-    private readonly _mapper: ScheduleMapper,
+    private readonly _mapper: ScheduleMapperService,
   ) {}
 
   async create(userId: number): Promise<void> {
