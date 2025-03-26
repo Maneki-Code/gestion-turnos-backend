@@ -13,6 +13,7 @@ import { CustomerForUpdateDto } from '../dtos/customerForUpdateDto.dto';
 
 @Injectable()
 export class CustomersService {
+  
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _customerMapper: CustomerMapperService,
@@ -103,5 +104,21 @@ export class CustomersService {
       data: updateData
     });
   }
-  
+
+  async deleteCustomer(id: number) {
+    /* Eliminar sus appointments? tal vez los próximos */
+    const customerFound = await this._prisma.customer.findUnique({
+      where:{
+        id:id
+      }
+    });
+
+    if(!customerFound) throw new NotFoundException(`No se encontró a el cliente.`);
+
+    await this._prisma.customer.delete({
+      where: {
+        id
+      }
+    })
+  }
 }

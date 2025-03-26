@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { CustomersService } from '../services/customers.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -29,6 +29,13 @@ export class CustomersController {
   @Roles('ADMIN')
   @Patch()
   async updateCustomer(@Body() request: CustomerForUpdateDto){
-    return await this._customerService.updateCustomer(request);
+    await this._customerService.updateCustomer(request);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete(':id')
+  async deleteCustomer(@Param('id') id:number){
+    await this._customerService.deleteCustomer(id);
   }
 }
