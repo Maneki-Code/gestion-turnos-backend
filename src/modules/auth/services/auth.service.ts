@@ -1,12 +1,12 @@
-import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {  ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/services/users.service';
 import { LoginDto } from '../dtos/login.dto';
 import { RegisterDto } from '../dtos/register.dto';
 import { HashService } from './hash/hash.service';
 import { User } from '@prisma/client';
-import { AuthResponse } from '../dtos/auth.response';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
+import { ChangePasswordDto } from '../dtos/changePasswordDto.dto';
 
 @Injectable()
 export class AuthService {
@@ -86,6 +86,15 @@ export class AuthService {
 
     // Responder con un mensaje de éxito
     response.status(200).send({ message: 'Logged out successfully' });
+  }
+
+  async changePassword(request: ChangePasswordDto) {
+    const userFound = await this.userService.findOneByEmail(request.email)
+    if(!userFound) throw new NotFoundException(`El usuario con el email '${request.email}' no existe`);
+    
+    if(await this.hashService.comparePassword(request.oldPassword, userFound.password) === false) throw new ConflictException(`La password antigua no es correcta.`);
+    request.newPassword = await this.hashService.hashPassword(request.newPassword);
+    await this.userService.updatePassword(request);
   }
 
   generateToken(user: User): string {

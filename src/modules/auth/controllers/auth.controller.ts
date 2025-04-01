@@ -1,5 +1,5 @@
 
-import { Body, Controller, Get, HttpCode, Post, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
@@ -8,6 +8,10 @@ import { Response } from 'express';
 import { Request } from 'express';
 import { Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { ChangePasswordDto } from '../dtos/changePasswordDto.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -73,4 +77,11 @@ export class AuthController {
     }
   }
   
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Patch('change-password')
+  @HttpCode(201)
+  async changePassword(@Body() request:ChangePasswordDto){
+    await this.authService.changePassword(request);
+  }
 }

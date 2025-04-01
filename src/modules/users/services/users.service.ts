@@ -4,9 +4,11 @@ import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { RegisterDto } from 'src/modules/auth/dtos/register.dto';
 import { UserResponse } from '../dtos/user.response';
 import { SchedulesService } from 'src/modules/schedules/services/schedules.service';
+import { ChangePasswordDto } from 'src/modules/auth/dtos/changePasswordDto.dto';
 
 @Injectable()
 export class UsersService {
+  
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _schedules: SchedulesService
@@ -35,6 +37,17 @@ export class UsersService {
         email,
       },
     });
+  }
+
+  async updatePassword(request: ChangePasswordDto) {
+    await this._prisma.user.update({
+      where:{
+        email: request.email
+      },
+      data:{
+        password: request.newPassword
+      }
+    })
   }
 
   async GetUserById(id:number):Promise<UserResponse>{
