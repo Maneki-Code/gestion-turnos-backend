@@ -39,13 +39,13 @@ export class UsersService {
     });
   }
 
-  async updatePassword(request: ChangePasswordDto) {
+  async updatePassword(hashedPassword: string, email: string) {
     await this._prisma.user.update({
       where:{
-        email: request.email
+        email: email
       },
       data:{
-        password: request.newPassword
+        password: hashedPassword
       }
     })
   }
