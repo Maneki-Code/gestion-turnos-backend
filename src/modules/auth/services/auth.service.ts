@@ -121,5 +121,4 @@ export class AuthService {
     console.log('Cookie set:', token);
   }
 
-
 }

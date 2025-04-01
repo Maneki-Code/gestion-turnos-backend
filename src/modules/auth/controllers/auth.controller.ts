@@ -84,6 +84,7 @@ export class AuthController {
   @HttpCode(201)
   async changePassword(@Body() request:ChangePasswordDto, @Req() req: RequestWithUser){
     const email = req.user.email;
+    console.log('Email del usuario:', email);
     await this.authService.changePassword(request, email);
   }
 }
