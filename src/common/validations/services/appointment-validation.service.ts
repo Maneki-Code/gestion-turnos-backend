@@ -93,8 +93,13 @@ export class AppointmentValidationService {
 
     const startTime = DateTime.fromFormat(request.startTime, format);
     const endTime = DateTime.fromFormat(request.endTime, format);
-
+    console.log('DIA A VALIDAR:', request.date);
     const dayOfWeek = this._time.getDayOfWeek(this._time.convertStringToDate(request.date));
+    console.table({
+      startTime: startTime.toFormat(format),
+      endTime: endTime.toFormat(format),
+      dayOfWeek: dayOfWeek,
+    });
     const scheduleDayConfig = await this._prisma.scheduleDayConfig.findFirst({
       where:{
         scheduleId: request.scheduleId,
