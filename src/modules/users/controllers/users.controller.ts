@@ -16,7 +16,7 @@ export class UsersController {
   @Patch('update-profile')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN', 'MANAGER')
-  async helloFromSecured(@Body() request: UserForUpdateDto, @Req() req: RequestWithUser){
+  async updateProfile(@Body() request: UserForUpdateDto, @Req() req: RequestWithUser){
     const email = req.user.email;
     await this._userServices.update(request, email);
   }
