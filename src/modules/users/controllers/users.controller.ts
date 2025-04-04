@@ -21,5 +21,4 @@ export class UsersController {
     await this._userServices.update(request, email);
   }
 
-  
 }
