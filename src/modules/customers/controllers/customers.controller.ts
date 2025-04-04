@@ -29,7 +29,7 @@ export class CustomersController {
   @Roles('ADMIN')
   @Get('search')
   async search(@Query('query') query: string): Promise<CustomerResponse[]> {
-    if (!query) return []; 
+    if (!query || query === '' || query.length===0) return await this._customerService.findAll(); 
     return await this._customerService.searchCustomers(query);
   }
 
