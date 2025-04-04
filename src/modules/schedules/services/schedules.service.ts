@@ -9,6 +9,7 @@ import { ScheduleDayConfigService } from './schedule-day-config.service';
 import { EDayOfWeek} from '@prisma/client';
 import { ScheduleResponse } from '../dtos/schedule.response';
 import { ScheduleMapperService } from 'src/common/mappers/services/schedule-mapper.service';
+import { ScheduleDayConfigResponse } from '../dtos/scheduleDayConfig.response';
 
 @Injectable()
 export class SchedulesService {
@@ -89,8 +90,6 @@ export class SchedulesService {
   }
 
   async updateConfig(request: ScheduleForUpdateDto) {
-    console.log(request.id);
-    console.log(request.scheduleDays);
     const scheduleFound = await this.findFullById(request.id);
 
     if (!scheduleFound)
@@ -99,6 +98,10 @@ export class SchedulesService {
     for (const day of request.scheduleDays) {
       await this._schedulesDayConfig.updateDayConfig(day);
     }
+    return  await this._mapper.scheduleToConfigResponse(
+      scheduleFound,
+      scheduleFound.scheduleDays,
+    );
   }
 
   async findFullById(id: number) {

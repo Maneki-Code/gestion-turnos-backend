@@ -13,6 +13,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ScheduleForUpdateDto } from '../dtos/scheduleForUpdateDto.dto';
+import { ScheduleConfigResponse } from '../dtos/scheduleconfig.response';
 
 @Controller('schedules')
 export class SchedulesController {
@@ -37,7 +38,7 @@ export class SchedulesController {
   @Patch('update-config')
   async updateScheduleConfig(
     @Body() request: ScheduleForUpdateDto,
-  ): Promise<void> {
-    await this._scheduleService.updateConfig(request);
+  ): Promise<ScheduleConfigResponse> {
+     return await this._scheduleService.updateConfig(request);
   }
 }
