@@ -1,10 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { RegisterDto } from 'src/modules/auth/dtos/register.dto';
-import { UserResponse } from '../dtos/user.response';
 import { SchedulesService } from 'src/modules/schedules/services/schedules.service';
-import { ChangePasswordDto } from 'src/modules/auth/dtos/changePasswordDto.dto';
+import { UserForUpdateDto } from '../dtos/userForUpdateDto.dto';
 
 @Injectable()
 export class UsersService {
@@ -39,24 +38,32 @@ export class UsersService {
     });
   }
 
-  async updatePassword(request: ChangePasswordDto) {
+  async update(request: UserForUpdateDto, email: string): Promise<void>{
+    const userFound = await this.findOneByEmail(email);
+
+    if(userFound === null) throw new NotFoundException(`No se encontró usuario con el email '${email}`);
+    if(request.email && userFound.email === request.email) throw new BadRequestException(`El nuevo email no puede ser igual al enterior`);
+    if(request.email && await this.findOneByEmail(request.email) !== null) throw new ConflictException(`El email ingresado ya existe.`);
+    
+    await this._prisma.user.update({
+      where: { email },
+      data: {
+          firstName: request.firstName || userFound.firstName,
+          lastName: request.lastName || userFound.lastName,
+          email: request.email || userFound.email,
+      },
+  });
+  }
+
+  async updatePassword(hashedPassword: string, email: string): Promise<void> {
     await this._prisma.user.update({
       where:{
-        email: request.email
+        email: email
       },
       data:{
-        password: request.newPassword
+        password: hashedPassword
       }
     })
   }
 
-  async GetUserById(id:number):Promise<UserResponse>{
-    const usuario =  await this._prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
-    if(!usuario) throw new NotFoundException('No se encontró el usuario');
-    return {id:usuario?.id, firstName:usuario.firstName, lastname:usuario?.lastName, email:usuario.email}
-  }
 }

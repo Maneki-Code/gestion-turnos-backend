@@ -1,4 +1,4 @@
-import {  ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {  BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/services/users.service';
 import { LoginDto } from '../dtos/login.dto';
 import { RegisterDto } from '../dtos/register.dto';
@@ -88,13 +88,14 @@ export class AuthService {
     response.status(200).send({ message: 'Logged out successfully' });
   }
 
-  async changePassword(request: ChangePasswordDto) {
-    const userFound = await this.userService.findOneByEmail(request.email)
-    if(!userFound) throw new NotFoundException(`El usuario con el email '${request.email}' no existe`);
+  async changePassword(request: ChangePasswordDto, email: string) {
+    const userFound = await this.userService.findOneByEmail(email)
+    if(!userFound) throw new NotFoundException(`El usuario con el email '${email}' no existe`);
     
     if(await this.hashService.comparePassword(request.oldPassword, userFound.password) === false) throw new ConflictException(`La password antigua no es correcta.`);
-    request.newPassword = await this.hashService.hashPassword(request.newPassword);
-    await this.userService.updatePassword(request);
+    if(await this.hashService.comparePassword(request.newPassword, userFound.password) === true) throw new BadRequestException(`La password nueva password no puede ser igual a la anterior.`);
+    const hashedPassword = await this.hashService.hashPassword(request.newPassword);
+    await this.userService.updatePassword(hashedPassword, email);
   }
 
   generateToken(user: User): string {
@@ -119,4 +120,5 @@ export class AuthService {
 
     console.log('Cookie set:', token);
   }
+
 }

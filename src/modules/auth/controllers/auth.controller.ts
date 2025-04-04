@@ -12,6 +12,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ChangePasswordDto } from '../dtos/changePasswordDto.dto';
+import { RequestWithUser } from 'src/common/interfaces/requestWithUser.interface';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -81,7 +82,9 @@ export class AuthController {
   @Roles('ADMIN')
   @Patch('change-password')
   @HttpCode(201)
-  async changePassword(@Body() request:ChangePasswordDto){
-    await this.authService.changePassword(request);
+  async changePassword(@Body() request:ChangePasswordDto, @Req() req: RequestWithUser){
+    const email = req.user.email;
+    console.log('Email del usuario:', email);
+    await this.authService.changePassword(request, email);
   }
 }
