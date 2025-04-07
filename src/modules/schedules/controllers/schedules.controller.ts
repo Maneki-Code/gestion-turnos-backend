@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { SchedulesService } from '../services/schedules.service';
@@ -17,7 +18,7 @@ import { ScheduleConfigResponse } from '../dtos/scheduleconfig.response';
 
 @Controller('schedules')
 export class SchedulesController {
-  constructor(private _scheduleService: SchedulesService) {}
+  constructor(private _scheduleService: SchedulesService) { }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
@@ -39,6 +40,19 @@ export class SchedulesController {
   async updateScheduleConfig(
     @Body() request: ScheduleForUpdateDto,
   ): Promise<ScheduleConfigResponse> {
-     return await this._scheduleService.updateConfig(request);
+    return await this._scheduleService.updateConfig(request);
   }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Get('/stats/:email')
+  async getStatsByHour(
+    @Param('email') email: string,
+    @Query('months') months: number,
+  ) {
+    return await this._scheduleService.getStatsByHour(email, months);
+  }
+
+
+
 }

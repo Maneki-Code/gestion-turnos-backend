@@ -19,20 +19,59 @@ export class AppointmentsService {
     private readonly _appointmentMapper: AppointmentMapperService
   ) {}
 
-  async create(request: AppointmentForCreationDto): Promise<void> {
+  async createBulk(request: AppointmentForCreationDto[]): Promise<AppointmentResponse[]> {
+    const appointmentResponses: AppointmentResponse[] = [];
+    for (const appointment of request) {
+      const appointmentDate = this._time.convertStringToDate(appointment.date);
+  
+      await this._appointmentValidation.validateAppointmentTimes(appointment);
+      await this._appointmentValidation.validateAppointmentAvailability(appointment, appointmentDate);
+      await this._appointmentValidation.validateAppointmentNotOverlapRest(appointment, appointmentDate);
+  
+      let customerFound = await this._customer.findByPhoneNumber(appointment.customer.phoneNumber);
+  
+      if (!customerFound) {
+        customerFound = await this._customer.create(appointment.customer);
+      }
+  
+      const appointmentCreated = await this._prisma.appointment.create({
+        data: {
+          status: AppointmentStatus.RESERVADO,
+          description: appointment.description ?? null,
+          startTime: appointment.startTime,
+          endTime: appointment.endTime,
+          date: appointmentDate,
+          customerId: customerFound.id,
+          scheduleId: appointment.scheduleId,
+        },
+        include: {
+          customer: true, 
+        },
+      });
+  
+      if (!appointmentCreated) {
+        throw new BadRequestException('Algo salió mal al crear la reserva.');
+      }
+  
+      appointmentResponses.push(this._appointmentMapper.AppointmentToFullResponse(appointmentCreated));
+    }
+    return appointmentResponses;
+  }
+
+
+  async create(request: AppointmentForCreationDto): Promise<AppointmentResponse> {
     const appointmentDate = this._time.convertStringToDate(request.date);
+  
     await this._appointmentValidation.validateAppointmentTimes(request);
     await this._appointmentValidation.validateAppointmentAvailability(request, appointmentDate);
     await this._appointmentValidation.validateAppointmentNotOverlapRest(request, appointmentDate);
-    
-    let customerFound = await this._customer.findByPhoneNumber(
-      request.customer.phoneNumber,
-    );
-
+  
+    let customerFound = await this._customer.findByPhoneNumber(request.customer.phoneNumber);
+  
     if (!customerFound) {
       customerFound = await this._customer.create(request.customer);
     }
-
+  
     const appointmentCreated = await this._prisma.appointment.create({
       data: {
         status: AppointmentStatus.RESERVADO,
@@ -43,11 +82,18 @@ export class AppointmentsService {
         customerId: customerFound.id,
         scheduleId: request.scheduleId,
       },
-    }); 
-
-    if (!appointmentCreated)
-      throw new BadRequestException(`Algo salió mal al crear la reserva.`);  
+      include: {
+        customer: true, 
+      },
+    });
+  
+    if (!appointmentCreated) {
+      throw new BadRequestException('Algo salió mal al crear la reserva.');
+    }
+  
+    return this._appointmentMapper.AppointmentToFullResponse(appointmentCreated);
   }
+  
 
   async findAllBetweenDates(id: number, startDate: string, endDate: string): Promise<AppointmentResponse[]> {
     const start = this._time.convertStringToDate(startDate);
