@@ -9,8 +9,14 @@ export class AppointmentsController {
 
   @Post()
   async create(@Body() request: AppointmentForCreationDto) {
-    await this._appointment.create(request);
+    return await this._appointment.create(request);
   }
+
+  @Post('bulk')
+  async createBulk(@Body() request: AppointmentForCreationDto[]) {
+    return await this._appointment.createBulk(request);
+  }
+
 
   @Get('between-dates')
   async findAllBetweenDates(
