@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Appointment } from '@prisma/client';
+import { Appointment, AppointmentStatus } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { AppointmentForCreationDto } from 'src/modules/appointments/dtos/appointmentForCreationDto.dto';
@@ -124,5 +124,12 @@ export class AppointmentValidationService {
         `El turno debe durar exactamente ${scheduleDayConfig?.slotInterval} minutos.`,
       );
     }
+  }
+
+  validateStatusOrThrow(status: string): AppointmentStatus {
+    if (!Object.values(AppointmentStatus).includes(status as AppointmentStatus)) {
+      throw new BadRequestException(`Status inválido: ${status}`);
+    }
+    return status as AppointmentStatus;
   }
 }
