@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AppointmentsService } from '../services/appointments.service';
 import { AppointmentForCreationDto } from '../dtos/appointmentForCreationDto.dto';
 import { AppointmentResponse } from '../dtos/appointment.response';
@@ -48,5 +48,12 @@ export class AppointmentsController {
   @Patch('update-status')
   async updateStatus(@Query(':id') id: number, @Query(':status') status:AppointmentStatus ){
     return await this._appointment.updateStatus(id, status);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete('delete')
+  async deleteById(@Query(':id') id: number){
+    return await this._appointment.deleteById(id);
   }
 }

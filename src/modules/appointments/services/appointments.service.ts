@@ -12,6 +12,7 @@ import { NotFoundError } from 'rxjs';
 @Injectable()
 export class AppointmentsService {
   
+  
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _customer: CustomersService,
@@ -142,4 +143,11 @@ export class AppointmentsService {
     });
   }
 
+  async deleteById(id: number) {
+    const appointmentFound = await this.findOneById(id);
+
+    if(appointmentFound === null) throw new NotFoundException(`Turno no encontrado.`);
+
+    await this._prisma.appointment.delete({where:{id}});
+  }
 }
