@@ -1,12 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { CustomersService } from 'src/modules/customers/services/customers.service';
 import { AppointmentForCreationDto } from '../dtos/appointmentForCreationDto.dto';
-import { AppointmentStatus } from '@prisma/client';
+import { Appointment, AppointmentStatus } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { AppointmentValidationService } from 'src/common/validations/services/appointment-validation.service';
 import { AppointmentResponse } from '../dtos/appointment.response';
 import { AppointmentMapperService } from 'src/common/mappers/services/appointment-mapper.service';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class AppointmentsService {
@@ -94,7 +95,6 @@ export class AppointmentsService {
     return this._appointmentMapper.AppointmentToFullResponse(appointmentCreated);
   }
   
-
   async findAllBetweenDates(id: number, startDate: string, endDate: string): Promise<AppointmentResponse[]> {
     const start = this._time.convertStringToDate(startDate);
     const end = this._time.convertStringToDate(endDate);
@@ -121,4 +121,25 @@ export class AppointmentsService {
 
     return appointments.map(appointment=> this._appointmentMapper.AppointmentToFullResponse(appointment))
   }
+
+  async findOneById(id: number): Promise<Appointment | null>{
+    return this._prisma.appointment.findUnique({
+      where:{
+        id
+      }
+    })
+  }
+
+  async updateStatus(id: number, status: AppointmentStatus) {
+    const newStatus = this._appointmentValidation.validateStatusOrThrow(status);
+    const appointmentFound = await this.findOneById(id);
+
+    if(appointmentFound === null) throw new NotFoundException(`Turno no encontrado.`);
+    
+    await this._prisma.appointment.update({
+      where: { id },
+      data: { status: newStatus },
+    });
+  }
+
 }
