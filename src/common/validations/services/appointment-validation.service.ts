@@ -10,7 +10,7 @@ export class AppointmentValidationService {
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _time: TimeService,
-  ) {}
+  ) { }
 
   async validateAppointmentAvailability(
     request: AppointmentForCreationDto,
@@ -34,7 +34,7 @@ export class AppointmentValidationService {
     startTime: string,
     endTime: string,
   ): boolean {
-    return time >= startTime && time < endTime;
+    return time > startTime && time < endTime;
   }
 
   async findByScheduleIdAndDateAndStartTimeAndEndTime(
@@ -90,7 +90,6 @@ export class AppointmentValidationService {
 
   async validateAppointmentTimes(request: AppointmentForCreationDto) {
     const format = 'HH:mm';
-
     const startTime = DateTime.fromFormat(request.startTime, format);
     const endTime = DateTime.fromFormat(request.endTime, format);
     console.log('DIA A VALIDAR:', request.date);
@@ -101,11 +100,11 @@ export class AppointmentValidationService {
       dayOfWeek: dayOfWeek,
     });
     const scheduleDayConfig = await this._prisma.scheduleDayConfig.findFirst({
-      where:{
+      where: {
         scheduleId: request.scheduleId,
         day: dayOfWeek
       }
-    }) 
+    })
 
     if (!startTime.isValid || !endTime.isValid) {
       throw new BadRequestException('Formato de hora inválido. Use HH:mm.');
