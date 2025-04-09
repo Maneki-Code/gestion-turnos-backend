@@ -19,11 +19,11 @@ enum EUserRole {
 }
 
 enum AppointmentStatus {
-  DISPONIBLE
-  RESERVADO
-  ESPERANDO
-  TERMINADO
-  AUSENTE
+  // DISPONIBLE
+  RESERVADO // AMARILLO
+  // ESPERANDO
+  TERMINADO //VERDE
+  AUSENTE //ROJO
 }
 
 enum EDayOfWeek {
