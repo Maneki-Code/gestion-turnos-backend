@@ -6,6 +6,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { CustomerResponse } from '../dtos/customer.response';
 import { CustomerForUpdateDto } from '../dtos/customerForUpdateDto.dto';
 import { CustomerForCreationDto } from '../dtos/customerForCreationDto.dto';
+import { PaginatedResponse } from 'src/common/interfaces/paginated.response';
 
 @Controller('customers')
 export class CustomersController {
@@ -28,9 +29,10 @@ export class CustomersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Get('search')
-  async search(@Query('query') query: string): Promise<CustomerResponse[]> {
-    if (!query || query === '' || query.length===0) return await this._customerService.findAll(); 
-    return await this._customerService.searchCustomers(query);
+  async search(@Query('query') query: string, @Query('page') page: number, @Query('limit') limit: number): Promise<PaginatedResponse<CustomerResponse>> {
+    const skip = (page - 1) * limit;
+  
+    return await this._customerService.searchCustomers(query.trim(), skip, limit, page);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

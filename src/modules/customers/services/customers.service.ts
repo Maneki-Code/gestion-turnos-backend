@@ -10,6 +10,7 @@ import { CustomerForCreationDto } from '../dtos/customerForCreationDto.dto';
 import { CustomerResponse } from '../dtos/customer.response';
 import { CustomerMapperService } from 'src/common/mappers/services/customer-mapper.service';
 import { CustomerForUpdateDto } from '../dtos/customerForUpdateDto.dto';
+import { PaginatedResponse } from 'src/common/interfaces/paginated.response';
 
 @Injectable()
 export class CustomersService {
@@ -57,21 +58,37 @@ export class CustomersService {
     );
   }
 
-  async searchCustomers(query: string): Promise<CustomerResponse[]> {
-    const customers = await this._prisma.customer.findMany({
-      where: {
-        OR: [
-          { firstName: { contains: query } },
-          { lastName: { contains: query } },
-          { phoneNumber: { contains: query } },
-          { email: { contains: query } },
-        ],
-      },
-    });
+  async searchCustomers(
+    query: string,
+    skip: number,
+    take: number,
+    page: number,
+  ): Promise<PaginatedResponse<CustomerResponse>> {
 
-    return customers.map((customer) =>
-      this._customerMapper.customerToFullResponse(customer),
-    );
+    const whereClause = query ? {
+      OR: [
+        { firstName: { contains: query } },
+        { lastName: { contains: query } },
+        { phoneNumber: { contains: query } },
+        { email: { contains: query } },
+      ],
+    } : {};
+
+    const [customers, total] = await this._prisma.$transaction([
+      this._prisma.customer.findMany({
+        where: whereClause,
+        skip,
+        take,
+      }),
+      this._prisma.customer.count({ where: whereClause }),
+    ]);
+
+    return {
+      data: customers.map((customer) =>this._customerMapper.customerToFullResponse(customer)),
+      total,
+      page,
+      limit: take
+    }
   }
 
   async updateCustomer(request: CustomerForUpdateDto):Promise<void>{
