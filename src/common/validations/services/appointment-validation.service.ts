@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Appointment, AppointmentStatus } from '@prisma/client';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { Appointment, AppointmentStatus, EDayOfWeek } from '@prisma/client';
 import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { AppointmentForCreationDto } from 'src/modules/appointments/dtos/appointmentForCreationDto.dto';
@@ -131,5 +131,19 @@ export class AppointmentValidationService {
       throw new BadRequestException(`Status inválido: ${status}`);
     }
     return status as AppointmentStatus;
+  }
+
+  async validateAppointmentExistsByDayAfterDate(day: EDayOfWeek, date: DateTime){
+    const appointmentsFound = await this._prisma.appointment.findMany({
+      where:{
+        date: {
+          gt: date.toJSDate()
+        }
+      }
+    });
+    const exists = appointmentsFound.some(appointment =>this._time.getDayOfWeek(DateTime.fromJSDate(appointment.date).setZone('utc')) === day);
+    if (exists) {
+      throw new ConflictException(`Existe al menos un turno en un ${day} antes de la fecha proporcionada.`);
+    }
   }
 }

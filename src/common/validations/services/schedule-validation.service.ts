@@ -6,7 +6,8 @@ import { ScheduleDayRestForUpdateDto } from 'src/modules/schedules/dtos/Schedule
 
 @Injectable()
 export class ScheduleValidationService {
-  constructor(private readonly _time: TimeService) {}
+  constructor(
+    private readonly _time: TimeService) {}
 
   validateScheduleDay(
     newDay: ScheduleDayConfigForUpdateDto,

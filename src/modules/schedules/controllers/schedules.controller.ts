@@ -53,6 +53,4 @@ export class SchedulesController {
     return await this._scheduleService.getStatsByHour(email, months);
   }
 
-
-
 }
