@@ -120,7 +120,6 @@ export class SchedulesService {
     });
   }
 
-
   async getStatsByHour(email: string, months: number): Promise<{ hour: string; count: number }[]> {
     const user = await this._prisma.user.findFirst({ where: { email } });
   

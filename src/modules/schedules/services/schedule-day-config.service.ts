@@ -8,20 +8,21 @@ import {
   ScheduleDayConfig,
   ScheduleDayRestConfig,
 } from '@prisma/client';
-import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { ScheduleDayRestConfigService } from './schedule-day-rest-config.service';
 import { ScheduleDayConfigForUpdateDto } from '../dtos/scheduleDayForUpdateDto.dto';
 import { ScheduleDayRestForUpdateDto } from '../dtos/ScheduleDayRestForUpdateDto.dto';
 import { ScheduleValidationService } from 'src/common/validations/services/schedule-validation.service';
+import { AppointmentValidationService } from 'src/common/validations/services/appointment-validation.service';
+import { DateTime } from 'luxon'; // Importamos Luxon
 
 @Injectable()
 export class ScheduleDayConfigService {
   constructor(
     private readonly _prisma: PrismaService,
-    private readonly _time: TimeService,
     private readonly _rest: ScheduleDayRestConfigService,
-    private readonly _scheduleValidations:ScheduleValidationService
+    private readonly _scheduleValidations:ScheduleValidationService,
+    private readonly _appointmentValidation: AppointmentValidationService
   ) {}
 
   async create(scheduleId: number, day: EDayOfWeek) {
@@ -65,7 +66,10 @@ export class ScheduleDayConfigService {
     if (!dayFound)
       throw new NotFoundException(`Día con id: ${day.id} no encontrado`);
 
-    /* Verificar si existen turnos en ese horario */
+    /* Verificar si existen turnos en ese día a futuro */
+    if(day.status===false){
+      await this._appointmentValidation.validateAppointmentExistsByDayAfterDate(dayFound.day, DateTime.now());
+    }
 
     this._scheduleValidations.validateScheduleDay(day, dayFound);
 

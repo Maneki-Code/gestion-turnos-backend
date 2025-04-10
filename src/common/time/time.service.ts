@@ -9,25 +9,20 @@ export class TimeService {
     return hours * 60 + minutes;
   }
 
-  getDayOfWeek(date: DateTime): EDayOfWeek {
-    const dayOfWeek = date.weekday;
+  getDayOfWeek(date: Date | DateTime): EDayOfWeek {
+    const dt = date instanceof DateTime ? date : DateTime.fromJSDate(date);
+    const utcDate = dt.setZone('utc');
+    const dayOfWeek = utcDate.weekday;
+  
     switch (dayOfWeek) {
-      case 1:
-        return EDayOfWeek.LUNES;
-      case 2:
-        return EDayOfWeek.MARTES;
-      case 3:
-        return EDayOfWeek.MIÉRCOLES;
-      case 4:
-        return EDayOfWeek.JUEVES;
-      case 5:
-        return EDayOfWeek.VIERNES;
-      case 6:
-        return EDayOfWeek.SÁBADO;
-      case 7:
-        return EDayOfWeek.DOMINGO;
-      default:
-        throw new Error('Invalid day of the week');
+      case 1: return EDayOfWeek.LUNES;
+      case 2: return EDayOfWeek.MARTES;
+      case 3: return EDayOfWeek.MIÉRCOLES;
+      case 4: return EDayOfWeek.JUEVES;
+      case 5: return EDayOfWeek.VIERNES;
+      case 6: return EDayOfWeek.SÁBADO;
+      case 7: return EDayOfWeek.DOMINGO;
+      default: throw new Error('Invalid day of the week');
     }
   }
 
