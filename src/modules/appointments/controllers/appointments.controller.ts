@@ -52,7 +52,7 @@ export class AppointmentsController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @Delete('delete')
+  @Delete('')
   async deleteById(@Query(':id') id: number){
     return await this._appointment.deleteById(id);
   }
