@@ -23,7 +23,7 @@ export class AuthService {
       if (!user) {
         return response.status(401).json({
           status: 401,
-          message: 'Invalid email or password',
+          message: 'Credenciales inválidas.',
           user: null,
         });
       }
@@ -52,10 +52,24 @@ export class AuthService {
   async register(request: RegisterDto) {
     const existingUser = await this.userService.findOneByEmail(request.email);
     if (existingUser) {
-      throw new HttpException('User email already exists', HttpStatus.CONFLICT);
+      throw new HttpException('El email ya está en uso.', HttpStatus.CONFLICT);
     }
     
     return await this.userService.create({
+      firstName: request.firstName,
+      lastName: request.lastName,
+      email: request.email,
+      password: await this.hashService.hashPassword(request.password),
+    });
+  }
+
+  async createManager(request: RegisterDto){
+    const existingUser = await this.userService.findOneByEmail(request.email);
+    if (existingUser) {
+      throw new HttpException('El email ya está en uso.', HttpStatus.CONFLICT);
+    }
+    
+    return await this.userService.createManager({
       firstName: request.firstName,
       lastName: request.lastName,
       email: request.email,

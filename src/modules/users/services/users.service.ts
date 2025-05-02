@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { EUserRole, User } from '@prisma/client';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { RegisterDto } from 'src/modules/auth/dtos/register.dto';
 import { SchedulesService } from 'src/modules/schedules/services/schedules.service';
@@ -9,7 +9,7 @@ import { UserMapperService } from 'src/common/mappers/services/user-mapper.servi
 
 @Injectable()
 export class UsersService {
-  
+ 
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _schedules: SchedulesService,
@@ -17,9 +17,6 @@ export class UsersService {
   ) {}
 
   async create(request: RegisterDto): Promise<User> {
-    if ((await this.findOneByEmail(request.email)) !== null)
-      throw new BadRequestException(`El email '${request.email}' ya existe.`);
-
     const createdUser = await this._prisma.user.create({
       data: {
         ...request,
@@ -31,6 +28,20 @@ export class UsersService {
     await this._schedules.create(createdUser.id);
 
     return createdUser;
+  }
+
+  async createManager(request: RegisterDto): Promise<UserResponse> {
+    const createdUser = await this._prisma.user.create({
+      data: {
+        ...request,
+        role: EUserRole.MANAGER,
+      },
+    });
+    if (!createdUser) throw new BadRequestException(`Algo salió mal al crear el usuario.`);
+    
+    await this._schedules.create(createdUser.id);
+
+    return this._userMapper.userToFullResponse(createdUser);
   }
 
   async findAll():Promise<UserResponse[]> {

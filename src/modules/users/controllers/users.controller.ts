@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -7,6 +7,7 @@ import { UsersService } from '../services/users.service';
 import { RequestWithUser } from 'src/common/interfaces/requestWithUser.interface';
 import { UserForUpdateDto } from '../dtos/userForUpdateDto.dto';
 import { UserResponse } from '../dtos/user.response';
+import { RegisterDto } from 'src/modules/auth/dtos/register.dto';
 
 
 @Controller('users')
