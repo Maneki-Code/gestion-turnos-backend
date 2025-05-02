@@ -66,7 +66,7 @@ model ScheduleDayConfig {
   id           Int                     @id @default(autoincrement())
   scheduleId   Int
   schedule     Schedule                @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  day          EDayOfWeek              @unique
+  day          EDayOfWeek
   startTime    String
   endTime      String
   slotInterval Int
@@ -75,8 +75,10 @@ model ScheduleDayConfig {
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
 
+  @@unique([scheduleId, day]) 
   @@map("schedule_days_config")
 }
+
 
 model ScheduleDayRestConfig {
   id            Int               @id @default(autoincrement())
