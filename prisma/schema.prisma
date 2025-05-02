@@ -53,7 +53,7 @@ model User {
 model Schedule {
   id           Int                 @id @default(autoincrement())
   userId       Int                 @unique
-  user         User                @relation(fields: [userId], references: [id])
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments Appointment[]       @relation("ScheduleAppointments")
   scheduleDays ScheduleDayConfig[]
   createdAt    DateTime            @default(now())
