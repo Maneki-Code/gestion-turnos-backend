@@ -1,12 +1,12 @@
-import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {  BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/services/users.service';
 import { LoginDto } from '../dtos/login.dto';
 import { RegisterDto } from '../dtos/register.dto';
 import { HashService } from './hash/hash.service';
 import { User } from '@prisma/client';
-import { AuthResponse } from '../dtos/auth.response';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
+import { ChangePasswordDto } from '../dtos/changePasswordDto.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +30,6 @@ export class AuthService {
 
       const token = this.generateToken(user);
       this.setJwtCookie(response, token);
-
 
       return response.status(200).json({
         status: 200,
@@ -89,6 +88,16 @@ export class AuthService {
     response.status(200).send({ message: 'Logged out successfully' });
   }
 
+  async changePassword(request: ChangePasswordDto, email: string) {
+    const userFound = await this.userService.findOneByEmail(email)
+    if(!userFound) throw new NotFoundException(`El usuario con el email '${email}' no existe`);
+    
+    if(await this.hashService.comparePassword(request.oldPassword, userFound.password) === false) throw new ConflictException(`La password antigua no es correcta.`);
+    if(await this.hashService.comparePassword(request.newPassword, userFound.password) === true) throw new BadRequestException(`La password nueva password no puede ser igual a la anterior.`);
+    const hashedPassword = await this.hashService.hashPassword(request.newPassword);
+    await this.userService.updatePassword(hashedPassword, email);
+  }
+
   generateToken(user: User): string {
     const payload = {
       email: user.email,
@@ -111,4 +120,5 @@ export class AuthService {
 
     console.log('Cookie set:', token);
   }
+
 }

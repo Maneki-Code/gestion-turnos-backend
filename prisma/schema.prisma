@@ -19,11 +19,11 @@ enum EUserRole {
 }
 
 enum AppointmentStatus {
-  DISPONIBLE
-  RESERVADO
-  ESPERANDO
-  TERMINADO
-  AUSENTE
+  // DISPONIBLE
+  RESERVADO // AMARILLO
+  // ESPERANDO
+  TERMINADO //VERDE
+  AUSENTE //ROJO
 }
 
 enum EDayOfWeek {
@@ -112,8 +112,8 @@ model Customer {
   id          Int      @id @default(autoincrement())
   firstName   String
   lastName    String
-  phoneNumber String
-  email       String?
+  phoneNumber String   @unique
+  email       String?  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

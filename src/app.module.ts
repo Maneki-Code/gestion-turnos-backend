@@ -9,6 +9,9 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { TimeService } from './common/time/time.service';
+import { CustomersModule } from './modules/customers/customers.module';
+import { ValidationsModule } from './common/validations/validations.module';
+import { MappersModule } from './common/mappers/mappers.module';
 
 @Module({
   imports: [
@@ -20,7 +23,10 @@ import { TimeService } from './common/time/time.service';
     UsersModule,
     AuthModule,
     SchedulesModule,
-    AppointmentsModule],
+    AppointmentsModule,
+    CustomersModule,
+    ValidationsModule,
+    MappersModule],
   providers: [PrismaService, TimeService],
   exports: [PrismaService, TimeService]
 })

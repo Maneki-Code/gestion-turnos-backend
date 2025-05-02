@@ -7,6 +7,6 @@ export interface ScheduleDayConfigResponse {
   startTime: string;
   endTime: string;
   slotInterval: number;
-  status: Boolean;
+  status: boolean;
   rests: ScheduleDayRestConfigResponse[];
 }
