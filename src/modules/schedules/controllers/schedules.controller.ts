@@ -40,6 +40,7 @@ export class SchedulesController {
   async updateScheduleConfig(
     @Body() request: ScheduleForUpdateDto,
   ): Promise<ScheduleConfigResponse> {
+    
     return await this._scheduleService.updateConfig(request);
   }
 
