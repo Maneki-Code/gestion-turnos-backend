@@ -91,18 +91,26 @@ export class SchedulesService {
 
   async updateConfig(request: ScheduleForUpdateDto) {
     const scheduleFound = await this.findFullById(request.id);
-
+  
     if (!scheduleFound)
       throw new NotFoundException(`Agenda con id ${request.id} no encontrada`);
-
+  
     for (const day of request.scheduleDays) {
       await this._schedulesDayConfig.updateDayConfig(day);
     }
+  
+    const updatedSchedule = await this.findFullById(request.id);
+  
+    if (!updatedSchedule)
+      throw new NotFoundException(`Agenda actualizada con id ${request.id} no encontrada`);
+  
     return await this._mapper.scheduleToConfigResponse(
-      scheduleFound,
-      scheduleFound.scheduleDays,
+      updatedSchedule,
+      updatedSchedule.scheduleDays,
     );
   }
+  
+  
 
   async findFullById(id: number) {
     return await this._prisma.schedule.findUnique({
