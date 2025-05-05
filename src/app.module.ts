@@ -12,6 +12,7 @@ import { TimeService } from './common/time/time.service';
 import { CustomersModule } from './modules/customers/customers.module';
 import { ValidationsModule } from './common/validations/validations.module';
 import { MappersModule } from './common/mappers/mappers.module';
+import { OfferedServicesModule } from './modules/offered-services/offered-services.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { MappersModule } from './common/mappers/mappers.module';
     AppointmentsModule,
     CustomersModule,
     ValidationsModule,
-    MappersModule],
+    MappersModule,
+    OfferedServicesModule],
   providers: [PrismaService, TimeService],
   exports: [PrismaService, TimeService]
 })
