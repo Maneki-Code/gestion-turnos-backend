@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { OfferedServicesService } from '../services/offered-services.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { OfferedServiceForCreationDto } from '../dtos/offeredServiceForCreationDto.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { OfferedServiceResponse } from '../dtos/offeredService.response';
+import { OfferedServiceForUpdateDto } from '../dtos/offeredServiceForUpdateDto.dto';
 
 @Controller('offered-services')
 export class OfferedServicesController {
@@ -22,5 +23,12 @@ export class OfferedServicesController {
   @Get()
   async findAll():Promise<OfferedServiceResponse[]> {
     return await this._offeredServicesService.findAll();
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Patch()
+  async update(@Body() request: OfferedServiceForUpdateDto): Promise<OfferedServiceResponse> {
+    return await this._offeredServicesService.update(request);
   }
 }
