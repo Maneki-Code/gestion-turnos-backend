@@ -90,6 +90,7 @@ export class UsersService {
     const userFound = await this._prisma.user.findUnique({where: {id}});
 
     if(!userFound) throw new NotFoundException('Usuario no encontrado.');
+    if(userFound.role === EUserRole.ADMIN) throw new BadRequestException(`No es posible eliminar usuarios de tipo Administrador`);
 
     await this._prisma.user.delete({ where: { id } });
   }
