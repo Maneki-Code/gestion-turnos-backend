@@ -3,7 +3,7 @@ import { Body, Controller, Get, HttpCode, Patch, Post, Res, UnauthorizedExceptio
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Request } from 'express';
 import { Req } from '@nestjs/common';
@@ -46,6 +46,14 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'User email already exists' })
   async register(@Body() request: RegisterDto): Promise<void> {
     await this.authService.register(request);
+  }
+
+  @ApiBearerAuth() 
+  @Post('/create-manager')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async createManager(@Body() request:RegisterDto){
+    return await this.authService.createManager(request);
   }
 
 

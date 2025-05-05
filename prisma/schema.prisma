@@ -53,7 +53,7 @@ model User {
 model Schedule {
   id           Int                 @id @default(autoincrement())
   userId       Int                 @unique
-  user         User                @relation(fields: [userId], references: [id])
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments Appointment[]       @relation("ScheduleAppointments")
   scheduleDays ScheduleDayConfig[]
   createdAt    DateTime            @default(now())
@@ -66,7 +66,7 @@ model ScheduleDayConfig {
   id           Int                     @id @default(autoincrement())
   scheduleId   Int
   schedule     Schedule                @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  day          EDayOfWeek              @unique
+  day          EDayOfWeek
   startTime    String
   endTime      String
   slotInterval Int
@@ -75,8 +75,10 @@ model ScheduleDayConfig {
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
 
+  @@unique([scheduleId, day]) 
   @@map("schedule_days_config")
 }
+
 
 model ScheduleDayRestConfig {
   id            Int               @id @default(autoincrement())
@@ -120,4 +122,14 @@ model Customer {
   appointments Appointment[]
 
   @@map("customers")
+}
+
+model OfferedService{
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  description String?
+  price       Decimal
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@map("OfferedServices")
 }
