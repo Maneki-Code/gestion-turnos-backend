@@ -1,6 +1,6 @@
 # 📘 Documentación del Sistema de Reservas
 
-Este sistema permite gestionar la reserva de turnos para distintos profesionales. Cada usuario puede definir su disponibilidad semanal, incluyendo intervalos de atención, horarios de descanso, y turnos reservables por clientes. La lógica está diseñada para ser flexible y adaptarse a distintas configuraciones horarias.
+Este sistema permite gestionar la reserva de turnos para distintos profesionales. El usuario Admin administra la disponibilidad semanal, incluyendo intervalos de atención, horarios de descanso, y turnos reservables por clientes. La lógica está diseñada para ser flexible y adaptarse a distintas configuraciones horarias.
 
 ---
 

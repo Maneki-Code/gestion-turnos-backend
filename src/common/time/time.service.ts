@@ -41,4 +41,10 @@ export class TimeService {
   convertStringToDate(date: string): DateTime {
     return DateTime.fromFormat(date, 'yyyy-MM-dd', { zone: 'utc' }); // Devuelve un objeto DateTime
   }
+
+  minutesToTime(minutes: number): string {
+    const hours = Math.floor(minutes / 60); // Obtener las horas
+    const mins = minutes % 60; // Obtener los minutos restantes
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`; // Devolver en formato HH:mm
+  }
 }
