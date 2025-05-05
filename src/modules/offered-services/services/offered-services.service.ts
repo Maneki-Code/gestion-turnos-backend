@@ -9,6 +9,7 @@ import { OfferedServiceForUpdateDto } from '../dtos/offeredServiceForUpdateDto.d
 @Injectable()
 export class OfferedServicesService {
   
+  
   constructor(private readonly _prisma:PrismaService){}
 
   async create(request: OfferedServiceForCreationDto): Promise<OfferedServiceResponse> {
@@ -68,6 +69,19 @@ export class OfferedServicesService {
     return this.offeredServiceToResponse(updatedService);
   }
   
+  async delete(id: number): Promise<void> {
+    const foundService = await this._prisma.offeredService.findUnique({
+      where: { id },
+    });
+  
+    if (!foundService) {
+      throw new BadRequestException(`No se encontró un servicio con el id: ${id}`);
+    }
+
+    await this._prisma.offeredService.delete({
+      where: {id}
+    });
+  }
   
 
   offeredServiceToResponse(request: OfferedService): OfferedServiceResponse{

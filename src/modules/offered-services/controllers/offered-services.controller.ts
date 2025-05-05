@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { OfferedServicesService } from '../services/offered-services.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { OfferedServiceForCreationDto } from '../dtos/offeredServiceForCreationDto.dto';
@@ -30,5 +30,12 @@ export class OfferedServicesController {
   @Patch()
   async update(@Body() request: OfferedServiceForUpdateDto): Promise<OfferedServiceResponse> {
     return await this._offeredServicesService.update(request);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete('')
+  async delete(@Query(':serviceId') id: number): Promise<void> {
+    return await this._offeredServicesService.delete(id);
   }
 }
