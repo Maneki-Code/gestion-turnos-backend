@@ -23,7 +23,7 @@ export class CustomersController {
   constructor(private readonly _customerService: CustomersService) {}
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Post()
   async create(@Body() request: CustomerForCreationDto) {
     await this._customerService.create(request);
