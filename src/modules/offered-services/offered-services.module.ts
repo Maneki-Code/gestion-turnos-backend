@@ -9,5 +9,6 @@ import { PrismaService } from 'src/config/database/prisma/prisma.service';
   imports: [MappersModule],
   providers: [JwtService, PrismaService,OfferedServicesService],
   controllers: [OfferedServicesController],
+  exports: [OfferedServicesService]
 })
 export class OfferedServicesModule {}

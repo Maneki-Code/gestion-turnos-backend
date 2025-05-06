@@ -7,6 +7,8 @@ export interface AppointmentResponse {
   endTime: String;
   date: String;
   status: AppointmentStatus;
-  description?: string;
+  serviceTitle: String;
+  servicePrice: number;
+  serviceDescription?: String;
   customer?: CustomerResponse;
 }

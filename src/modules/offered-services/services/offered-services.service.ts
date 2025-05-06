@@ -30,6 +30,14 @@ export class OfferedServicesService {
     return this.offeredServiceToResponse(createdService);
   }
 
+  async findById(id: number): Promise<OfferedService> {
+    const foundService = await this._prisma.offeredService.findUnique({where: {id}});
+    
+    if(!foundService) throw new BadRequestException('No existe el servicio ingresado.');
+
+    return foundService;
+  }
+
   async findAll(): Promise<OfferedServiceResponse[]> {
     const services = await this._prisma.offeredService.findMany();
 
