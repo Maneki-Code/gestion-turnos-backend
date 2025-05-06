@@ -10,7 +10,8 @@ export class UserMapperService {
       id: user.id,
       firstName: user.firstName,
       lastname: user.lastName,
-      email: user.email
+      email: user.email,
+      role: user.role
     }
   }
 }
