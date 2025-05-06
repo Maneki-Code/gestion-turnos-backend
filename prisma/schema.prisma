@@ -75,10 +75,9 @@ model ScheduleDayConfig {
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
 
-  @@unique([scheduleId, day]) 
+  @@unique([scheduleId, day])
   @@map("schedule_days_config")
 }
-
 
 model ScheduleDayRestConfig {
   id            Int               @id @default(autoincrement())
@@ -93,16 +92,18 @@ model ScheduleDayRestConfig {
 }
 
 model Appointment {
-  id          Int               @id @default(autoincrement())
-  startTime   String
-  endTime     String
-  date        DateTime
-  description String?
-  status      AppointmentStatus
-  customerId  Int?
-  customer    Customer?         @relation(fields: [customerId], references: [id])
-  scheduleId  Int
-  schedule    Schedule          @relation("ScheduleAppointments", fields: [scheduleId], references: [id], onDelete: Cascade)
+  id                 Int               @id @default(autoincrement())
+  startTime          String
+  endTime            String
+  date               DateTime
+  serviceTitle       String            
+  servicePrice       Decimal          
+  serviceDescription String?
+  status             AppointmentStatus
+  customerId         Int?
+  customer           Customer?         @relation(fields: [customerId], references: [id])
+  scheduleId         Int
+  schedule           Schedule          @relation("ScheduleAppointments", fields: [scheduleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,7 +116,7 @@ model Customer {
   firstName   String
   lastName    String
   phoneNumber String   @unique
-  email       String?  
+  email       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -124,12 +125,13 @@ model Customer {
   @@map("customers")
 }
 
-model OfferedService{
+model OfferedService {
   id          Int      @id @default(autoincrement())
   title       String   @unique
   description String?
   price       Decimal
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
   @@map("OfferedServices")
 }

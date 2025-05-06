@@ -14,7 +14,9 @@ export class AppointmentMapperService {
         endTime: request.endTime,
         date: request.date.toISOString(),
         customer: request.customer ? this._customerMapper.customerToFullResponse(request.customer) : undefined, 
-        description: request.description ?? ''
+        servicePrice: parseFloat(request.servicePrice.toString()),
+        serviceTitle: request.serviceTitle,
+        serviceDescription: request.serviceDescription || ''
       }
     }
 }

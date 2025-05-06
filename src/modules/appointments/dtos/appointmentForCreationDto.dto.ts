@@ -62,6 +62,15 @@ export class AppointmentForCreationDto {
   scheduleId: number;
 
   @ApiProperty({
+    description: 'ID of the offered service',
+    example: 1,
+    type: Number,
+  })
+  @IsInt()
+  @IsNotEmpty()
+  serviceId: number;
+
+  @ApiProperty({
     description: 'Customer information for this appointment',
     type: CustomerForCreationDto,
   })

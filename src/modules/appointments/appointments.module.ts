@@ -7,9 +7,10 @@ import { TimeService } from 'src/common/time/time.service';
 import { ValidationsModule } from 'src/common/validations/validations.module';
 import { MappersModule } from 'src/common/mappers/mappers.module';
 import { JwtService } from '@nestjs/jwt';
+import { OfferedServicesModule } from '../offered-services/offered-services.module';
 
 @Module({
-  imports: [ MappersModule, CustomersModule, ValidationsModule],
+  imports: [OfferedServicesModule, MappersModule, CustomersModule, ValidationsModule],
   providers: [TimeService, JwtService, PrismaService, AppointmentsService],
   controllers: [AppointmentsController],
   exports:[AppointmentsService]
