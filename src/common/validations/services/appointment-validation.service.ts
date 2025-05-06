@@ -29,6 +29,22 @@ export class AppointmentValidationService {
       );
   }
 
+  async validateAppointmentDateIsNotOnHoliday(scheduleId: number, date: DateTime) {
+    const overlappingHoliday = await this._prisma.scheduleHoliday.findFirst({
+      where: {
+        scheduleId,
+        startDate: { lte: date.toJSDate() },
+        endDate: { gte: date.toJSDate() },
+      },
+    });
+  
+    if (overlappingHoliday) {
+      throw new BadRequestException(
+        `La fecha ${date.toISODate()} cae en un feriado o vacaciones del personal`,
+      );
+    }
+  }
+
   private isTimeBetween(
     time: string,
     startTime: string,
