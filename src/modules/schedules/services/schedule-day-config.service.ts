@@ -60,7 +60,7 @@ export class ScheduleDayConfigService {
     });
   }
 
-  async updateDayConfig(day: ScheduleDayConfigForUpdateDto) {
+  async updateDayConfig(scheduleId: number, day: ScheduleDayConfigForUpdateDto) {
     const dayFound = await this.findDayById(day.id);
 
     if (!dayFound)
@@ -68,7 +68,7 @@ export class ScheduleDayConfigService {
 
     /* Verificar si existen turnos en ese día a futuro */
     if(day.status===false){
-      await this._appointmentValidation.validateAppointmentExistsByDayAfterDate(dayFound.day, DateTime.now());
+      await this._appointmentValidation.validateAppointmentExistsByDayAfterDate(scheduleId, dayFound.day, DateTime.now());
     }
 
     this._scheduleValidations.validateScheduleDay(day, dayFound);

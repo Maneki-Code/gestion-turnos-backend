@@ -56,6 +56,7 @@ model Schedule {
   user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments Appointment[]       @relation("ScheduleAppointments")
   scheduleDays ScheduleDayConfig[]
+  scheduleHolidays ScheduleHoliday[]
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
 
@@ -90,6 +91,22 @@ model ScheduleDayRestConfig {
 
   @@map("schedule_day_rests_config")
 }
+
+model ScheduleHoliday {
+  id         Int      @id @default(autoincrement())
+  scheduleId Int
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  startDate  DateTime
+  endDate    DateTime
+  reason     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([scheduleId, startDate, endDate])
+  @@map("schedule_holidays")
+}
+
+
 
 model Appointment {
   id                 Int               @id @default(autoincrement())
