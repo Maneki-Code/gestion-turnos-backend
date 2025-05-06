@@ -8,6 +8,8 @@ import { ScheduleDayConfigService } from './services/schedule-day-config.service
 import { ScheduleDayRestConfigService } from './services/schedule-day-rest-config.service';
 import { ValidationsModule } from 'src/common/validations/validations.module';
 import { MappersModule } from 'src/common/mappers/mappers.module';
+import { ScheduleHolidaysService } from './services/schedule-holidays.service';
+import { ScheduleHolidaysController } from './controllers/schedule-holidays.controller';
 
 @Module({
   imports:[MappersModule, ValidationsModule],
@@ -18,8 +20,9 @@ import { MappersModule } from 'src/common/mappers/mappers.module';
     SchedulesService,
     ScheduleDayConfigService,
     ScheduleDayRestConfigService,
+    ScheduleHolidaysService,
   ],
-  controllers: [SchedulesController],
+  controllers: [SchedulesController, ScheduleHolidaysController],
   exports: [SchedulesService],
 })
 export class SchedulesModule {}
