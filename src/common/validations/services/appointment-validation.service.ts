@@ -148,9 +148,10 @@ export class AppointmentValidationService {
     return status as AppointmentStatus;
   }
 
-  async validateAppointmentExistsByDayAfterDate(day: EDayOfWeek, date: DateTime){
+  async validateAppointmentExistsByDayAfterDate(scheduleId: number, day: EDayOfWeek, date: DateTime){
     const appointmentsFound = await this._prisma.appointment.findMany({
       where:{
+        id: scheduleId,
         date: {
           gt: date.toJSDate()
         }

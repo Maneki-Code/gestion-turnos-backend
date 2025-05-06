@@ -96,7 +96,7 @@ export class SchedulesService {
       throw new NotFoundException(`Agenda con id ${request.id} no encontrada`);
   
     for (const day of request.scheduleDays) {
-      await this._schedulesDayConfig.updateDayConfig(day);
+      await this._schedulesDayConfig.updateDayConfig(request.id, day);
     }
   
     const updatedSchedule = await this.findFullById(request.id);
