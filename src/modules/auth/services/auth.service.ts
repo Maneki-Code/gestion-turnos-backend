@@ -7,9 +7,11 @@ import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { ChangePasswordDto } from '../dtos/changePasswordDto.dto';
+import { ResetPasswordDto } from '../dtos/resetPasswordDto.dto';
 
 @Injectable()
 export class AuthService {
+  
   constructor(
     private readonly userService: UsersService,
     private readonly hashService: HashService,
@@ -110,6 +112,14 @@ export class AuthService {
     if(await this.hashService.comparePassword(request.newPassword, userFound.password) === true) throw new BadRequestException(`La password nueva password no puede ser igual a la anterior.`);
     const hashedPassword = await this.hashService.hashPassword(request.newPassword);
     await this.userService.updatePassword(hashedPassword, email);
+  }
+
+  async resetPassword(request: ResetPasswordDto) {
+    const userFound = await this.userService.findOneById(request.userId);
+    if(!userFound) throw new NotFoundException(`El usuario con el email '${request.userId}' no existe`);
+
+    const hashedPassword = await this.hashService.hashPassword(request.newPassword);
+    await this.userService.updatePassword(hashedPassword, userFound.email);
   }
 
   generateToken(user: User): string {

@@ -9,6 +9,7 @@ import { UserMapperService } from 'src/common/mappers/services/user-mapper.servi
 
 @Injectable()
 export class UsersService {
+  
  
   constructor(
     private readonly _prisma: PrismaService,
@@ -54,6 +55,14 @@ export class UsersService {
     return await this._prisma.user.findUnique({
       where: {
         email,
+      },
+    });
+  }
+
+  async findOneById(id: number) {
+    return await this._prisma.user.findUnique({
+      where: {
+        id,
       },
     });
   }
