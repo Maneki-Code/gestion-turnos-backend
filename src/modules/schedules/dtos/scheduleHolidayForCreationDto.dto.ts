@@ -3,12 +3,12 @@ import { IsInt, IsNotEmpty, IsOptional, IsString, Matches } from "class-validato
 
 export class ScheduleHolidayForCreationDto {
   @ApiProperty({
-    description: 'ID of the schedule to apply holidays to',
+    description: 'ID of the user to apply holidays to',
     example: 1,
   })
   @IsInt()
   @IsNotEmpty()
-  scheduleId: number;
+  userId: number;
 
   @ApiProperty({
     description: 'Initial date of holidays',
