@@ -20,7 +20,7 @@ export class ScheduleHolidaysService {
 
   async create(request: ScheduleHolidayForCreationDto) {
     const foundSchedule = await this._prisma.schedule.findUnique({
-      where: { id: request.scheduleId },
+      where: { userId: request.userId },
     });
 
     if (!foundSchedule) {
@@ -36,9 +36,9 @@ export class ScheduleHolidaysService {
       );
     }
 
-    return this._prisma.scheduleHoliday.create({
+    return await this._prisma.scheduleHoliday.create({
       data: {
-        scheduleId: request.scheduleId,
+        scheduleId: request.userId,
         reason: request.reason ?? '',
         startDate: start.toJSDate(),
         endDate: end.toJSDate(),
