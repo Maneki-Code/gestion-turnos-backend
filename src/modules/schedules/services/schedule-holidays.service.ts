@@ -12,6 +12,7 @@ import { ScheduleMapperService } from 'src/common/mappers/services/schedule-mapp
 
 @Injectable()
 export class ScheduleHolidaysService {
+  
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _time: TimeService,
@@ -46,9 +47,10 @@ export class ScheduleHolidaysService {
     });
   }
 
-  async findAllByScheduleId(scheduleId: number) {
+
+  async findAllByUserId(userId: number) {
     const foundSchedule = await this._prisma.schedule.findUnique({
-      where: { id: scheduleId },
+      where: { userId: userId },
       include: {
         scheduleHolidays: true,
       },
@@ -59,5 +61,19 @@ export class ScheduleHolidaysService {
     }
 
     return foundSchedule.scheduleHolidays.map(holiday => this._scheduleMapper.scheduleHolidayToResponse(holiday));
+  }
+
+  async delete(id: number) {
+    const foundScheduleHoliday = await this._prisma.scheduleHoliday.findUnique({
+      where: { id: id },
+    });
+
+    if (!foundScheduleHoliday) {
+      throw new NotFoundException(`No se encontró el día de vacaciones`);
+    }
+
+    return this._prisma.scheduleHoliday.delete({
+      where: { id: id },
+    });
   }
 }
