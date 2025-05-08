@@ -12,21 +12,21 @@ export class AppointmentsController {
   constructor(private readonly _appointment: AppointmentsService) {}
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Post()
   async create(@Body() request: AppointmentForCreationDto) {
     return await this._appointment.create(request);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Post('bulk')
   async createBulk(@Body() request: AppointmentForCreationDto[]) {
     return await this._appointment.createBulk(request);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Get('between-dates')
   async findAllBetweenDates(
     @Query('id') id: number,
@@ -37,21 +37,21 @@ export class AppointmentsController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Get('/find-one')
   async findOneById(@Query(':id') id: number){
     return await this._appointment.findOneById(id);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Patch('update-status')
   async updateStatus(@Query(':id') id: number, @Query(':status') status:AppointmentStatus ){
     return await this._appointment.updateStatus(id, status);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Delete('')
   async deleteById(@Query(':id') id: number){
     return await this._appointment.deleteById(id);

@@ -30,14 +30,14 @@ export class CustomersController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Get()
   async findAll(): Promise<CustomerResponse[]> {
     return await this._customerService.findAll();
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Get('search')
   async search(
     @Query('query') query: string,
@@ -55,14 +55,14 @@ export class CustomersController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Patch()
   async updateCustomer(@Body() request: CustomerForUpdateDto) {
     await this._customerService.updateCustomer(request);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Delete(':id')
   async deleteCustomer(@Param('id') id: number) {
     await this._customerService.deleteCustomer(id);

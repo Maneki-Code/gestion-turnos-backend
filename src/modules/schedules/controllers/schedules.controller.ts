@@ -21,21 +21,21 @@ export class SchedulesController {
   constructor(private _scheduleService: SchedulesService) { }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Get('/:email')
   async findByEmailFullResponse(@Param('email') email: string) {
     return await this._scheduleService.findByEmailFullResponse(email);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Get('/config/:email')
   async findByEmailConfigResponse(@Param('email') email: string) {
     return await this._scheduleService.findByEmailConfigResponse(email);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Patch('update-config')
   async updateScheduleConfig(
     @Body() request: ScheduleForUpdateDto,
@@ -45,7 +45,7 @@ export class SchedulesController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'MANAGER')
   @Get('/stats/:email')
   async getStatsByHour(
     @Param('email') email: string,

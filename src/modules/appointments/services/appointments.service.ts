@@ -72,6 +72,7 @@ export class AppointmentsService {
   
     await this._appointmentValidation.validateAppointmentTimes(request);
     await this._appointmentValidation.validateAppointmentAvailability(request, appointmentDate);
+    await this._appointmentValidation.validateAppointmentDateIsNotOnHoliday(request.scheduleId, appointmentDate);
     await this._appointmentValidation.validateAppointmentNotOverlapRest(request, appointmentDate);
   
     let customerFound = await this._customer.findByPhoneNumber(request.customer.phoneNumber);
