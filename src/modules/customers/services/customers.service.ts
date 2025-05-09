@@ -66,12 +66,14 @@ export class CustomersService {
   ): Promise<PaginatedResponse<CustomerResponse>> {
 
     const whereClause = query ? {
-      OR: [
-        { firstName: { contains: query } },
-        { lastName: { contains: query } },
-        { phoneNumber: { contains: query } },
-        { email: { contains: query } },
-      ],
+      AND: query.split(' ').map(q => ({
+        OR: [
+          { firstName: { contains: q } },
+          { lastName: { contains: q } },
+          { phoneNumber: { contains: q } },
+          { email: { contains: q } },
+        ],
+      }))
     } : {};
 
     const [customers, total] = await this._prisma.$transaction([
