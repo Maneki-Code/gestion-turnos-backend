@@ -31,6 +31,7 @@ export class ScheduleMapperService {
   async scheduleToConfigResponse(
     schedule: Schedule,
     days: (ScheduleDayConfig & { rests: ScheduleDayRestConfig[] })[],
+    holidays: ScheduleHoliday[],
   ): Promise<ScheduleConfigResponse> {
     const daysConfig = await Promise.all(
       days.map((day) => this.scheduleDayToFullResponse(day)),
@@ -38,6 +39,7 @@ export class ScheduleMapperService {
     return {
       id: schedule.id,
       daysConfig: daysConfig,
+      holidays: holidays.map((holiday) => this.scheduleHolidayToResponse(holiday)),
     };
   }
 

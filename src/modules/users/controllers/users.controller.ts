@@ -8,6 +8,7 @@ import { RequestWithUser } from 'src/common/interfaces/requestWithUser.interface
 import { UserForUpdateDto } from '../dtos/userForUpdateDto.dto';
 import { UserResponse } from '../dtos/user.response';
 import { RegisterDto } from 'src/modules/auth/dtos/register.dto';
+import { UserOfferedServicesDto } from '../dtos/userOfferedServicesDto.dto';
 
 
 @Controller('users')
@@ -37,5 +38,13 @@ export class UsersController {
   @Roles('ADMIN')
   async deleteById(@Param('id') id:number){
     return await this._userServices.deleteById(id);
+  }
+
+  @ApiBearerAuth() 
+  @Patch('update-offered-services')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async setUserOfferedServices(@Body() request: UserOfferedServicesDto){
+    return await this._userServices.setUserOfferedServices(request);
   }
 }
