@@ -17,7 +17,7 @@ export class SchedulesService {
     private readonly _prisma: PrismaService,
     private readonly _schedulesDayConfig: ScheduleDayConfigService,
     private readonly _mapper: ScheduleMapperService,
-  ) { }
+  ) {}
 
   async create(userId: number): Promise<void> {
     const createdSchedule = await this._prisma.schedule.create({
@@ -48,6 +48,20 @@ export class SchedulesService {
             rests: true,
           },
         },
+        scheduleHolidays: {
+          where: {
+            OR: [
+              {
+                startDate: {
+                  lte: new Date(new Date().setDate(new Date().getDate() + 30)),
+                },
+                endDate: {
+                  gte: new Date(),
+                },
+              },
+            ],
+          },
+        },
         appointments: true,
       },
     });
@@ -60,6 +74,7 @@ export class SchedulesService {
     return await this._mapper.scheduleToConfigResponse(
       schedule,
       schedule.scheduleDays,
+      schedule.scheduleHolidays,
     );
   }
 
@@ -91,26 +106,27 @@ export class SchedulesService {
 
   async updateConfig(request: ScheduleForUpdateDto) {
     const scheduleFound = await this.findFullById(request.id);
-  
+
     if (!scheduleFound)
       throw new NotFoundException(`Agenda con id ${request.id} no encontrada`);
-  
+
     for (const day of request.scheduleDays) {
       await this._schedulesDayConfig.updateDayConfig(request.id, day);
     }
-  
+
     const updatedSchedule = await this.findFullById(request.id);
-  
+
     if (!updatedSchedule)
-      throw new NotFoundException(`Agenda actualizada con id ${request.id} no encontrada`);
-  
+      throw new NotFoundException(
+        `Agenda actualizada con id ${request.id} no encontrada`,
+      );
+
     return await this._mapper.scheduleToConfigResponse(
       updatedSchedule,
       updatedSchedule.scheduleDays,
+      updatedSchedule.scheduleHolidays,
     );
   }
-  
-  
 
   async findFullById(id: number) {
     return await this._prisma.schedule.findUnique({
@@ -124,17 +140,22 @@ export class SchedulesService {
           },
         },
         appointments: true,
+        scheduleHolidays: true,
       },
     });
   }
 
-  async getStatsByHour(email: string, months: number): Promise<{ hour: string; count: number }[]> {
+  async getStatsByHour(
+    email: string,
+    months: number,
+  ): Promise<{ hour: string; count: number }[]> {
     const user = await this._prisma.user.findFirst({ where: { email } });
-  
-    if (!user) throw new NotFoundException(`Usuario no encontrado con email ${email}`);
-  
+
+    if (!user)
+      throw new NotFoundException(`Usuario no encontrado con email ${email}`);
+
     let fromDate: Date;
-    
+
     if (months === 99) {
       // Histórico: desde que se creó el usuario hasta hoy
       fromDate = new Date(user.createdAt);
@@ -143,7 +164,7 @@ export class SchedulesService {
       fromDate = new Date();
       fromDate.setMonth(fromDate.getMonth() - months);
     }
-  
+
     const toDate = new Date(); // Siempre hasta hoy
     const schedule = await this._prisma.schedule.findFirst({
       where: { user: { email } },
@@ -160,46 +181,68 @@ export class SchedulesService {
         },
       },
     });
-    console.log('Desde:', fromDate.toISOString(), 'Hasta:', toDate.toISOString());
+    console.log(
+      'Desde:',
+      fromDate.toISOString(),
+      'Hasta:',
+      toDate.toISOString(),
+    );
 
-    if (!schedule) throw new NotFoundException(`Agenda no encontrada para ${email}`);
-  
-    const minInterval = Math.min(...schedule.scheduleDays.map(day => day.slotInterval));
-  
-    const activeDays = schedule.scheduleDays.filter(d => d.status);
-  
-    const fromMinutes = Math.min(...activeDays.map(day => {
-      const [h, m] = day.startTime.split(':').map(Number);
-      return h * 60 + m;
-    }));
-  
-    const toMinutes = Math.max(...activeDays.map(day => {
-      const [h, m] = day.endTime.split(':').map(Number);
-      return h * 60 + m;
-    }));
-  
+    if (!schedule)
+      throw new NotFoundException(`Agenda no encontrada para ${email}`);
+
+    const minInterval = Math.min(
+      ...schedule.scheduleDays.map((day) => day.slotInterval),
+    );
+
+    const activeDays = schedule.scheduleDays.filter((d) => d.status);
+
+    const fromMinutes = Math.min(
+      ...activeDays.map((day) => {
+        const [h, m] = day.startTime.split(':').map(Number);
+        return h * 60 + m;
+      }),
+    );
+
+    const toMinutes = Math.max(
+      ...activeDays.map((day) => {
+        const [h, m] = day.endTime.split(':').map(Number);
+        return h * 60 + m;
+      }),
+    );
+
     const slotMap: Record<string, number> = {};
-  
-    for (let minutes = fromMinutes; minutes < toMinutes; minutes += minInterval) {
-      const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+
+    for (
+      let minutes = fromMinutes;
+      minutes < toMinutes;
+      minutes += minInterval
+    ) {
+      const h = Math.floor(minutes / 60)
+        .toString()
+        .padStart(2, '0');
       const m = (minutes % 60).toString().padStart(2, '0');
       const key = `${h}:${m}`;
       slotMap[key] = 0;
     }
-  
+
     for (const appointment of schedule.appointments) {
-      const date = new Date(`${appointment.date.toISOString().split('T')[0]}T${appointment.startTime}`);
+      const date = new Date(
+        `${appointment.date.toISOString().split('T')[0]}T${appointment.startTime}`,
+      );
       const totalMinutes = date.getHours() * 60 + date.getMinutes();
       const rounded = Math.floor(totalMinutes / minInterval) * minInterval;
-      const h = Math.floor(rounded / 60).toString().padStart(2, '0');
+      const h = Math.floor(rounded / 60)
+        .toString()
+        .padStart(2, '0');
       const m = (rounded % 60).toString().padStart(2, '0');
       const key = `${h}:${m}`;
-  
+
       if (slotMap[key] !== undefined) {
         slotMap[key]++;
       }
     }
-  
+
     return Object.entries(slotMap)
       .sort(([a], [b]) => {
         const [ha, ma] = a.split(':').map(Number);
@@ -208,6 +251,4 @@ export class SchedulesService {
       })
       .map(([hour, count]) => ({ hour, count }));
   }
-  
-
 }
