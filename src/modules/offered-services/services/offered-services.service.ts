@@ -3,7 +3,6 @@ import { OfferedServiceForCreationDto } from '../dtos/offeredServiceForCreationD
 import { OfferedServiceResponse } from '../dtos/offeredService.response';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { OfferedService, Prisma } from '@prisma/client';
-import { of } from 'rxjs';
 import { OfferedServiceForUpdateDto } from '../dtos/offeredServiceForUpdateDto.dto';
 import { OfferedServicesMapperService } from 'src/common/mappers/services/offered-services-mapper.service';
 @Injectable()

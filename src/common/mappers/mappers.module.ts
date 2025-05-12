@@ -7,6 +7,6 @@ import { OfferedServicesMapperService } from './services/offered-services-mapper
 
 @Module({
   providers: [AppointmentMapperService, CustomerMapperService, ScheduleMapperService, UserMapperService, OfferedServicesMapperService],
-  exports: [AppointmentMapperService, CustomerMapperService, ScheduleMapperService]
+  exports: [AppointmentMapperService, CustomerMapperService, ScheduleMapperService, UserMapperService, OfferedServicesMapperService]
 })
 export class MappersModule {}
