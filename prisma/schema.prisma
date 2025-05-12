@@ -44,9 +44,9 @@ model User {
   password  String
   role      EUserRole
   schedule  Schedule?
+  offeredServices OfferedService[]  @relation("UserServices")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
   @@map("users")
 }
 
@@ -106,8 +106,6 @@ model ScheduleHoliday {
   @@map("schedule_holidays")
 }
 
-
-
 model Appointment {
   id                 Int               @id @default(autoincrement())
   startTime          String
@@ -147,6 +145,7 @@ model OfferedService {
   title       String   @unique
   description String?
   price       Decimal
+  users       User[]  @relation("UserServices")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
