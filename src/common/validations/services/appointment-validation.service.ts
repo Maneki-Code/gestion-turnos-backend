@@ -4,13 +4,37 @@ import { TimeService } from 'src/common/time/time.service';
 import { PrismaService } from 'src/config/database/prisma/prisma.service';
 import { AppointmentForCreationDto } from 'src/modules/appointments/dtos/appointmentForCreationDto.dto';
 import { DateTime } from 'luxon'; // Importamos Luxon
+import { GeneralSettingsService } from 'src/modules/general-settings/services/general-settings.service';
 
 @Injectable()
 export class AppointmentValidationService {
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _time: TimeService,
+    private readonly _generalSettings: GeneralSettingsService
   ) { }
+
+  async validateLimitDaysToReserve(date: DateTime){
+    const generalSettings = await this._generalSettings.getGeneralSettings();
+    if(!generalSettings) {
+      throw new BadRequestException('No se encontraron configuraciones generales.');
+    }
+    const maxDaysToReserve = generalSettings.limitDaysToReserve;
+    if(date > this._time.addDays(new Date(), maxDaysToReserve)) {
+      throw new BadRequestException(`No se puede reservar más de ${maxDaysToReserve} días antes de la fecha actual.`);
+    }
+  }
+
+  async validateMinAdvanceHours(date: DateTime){
+    const generalSettings = await this._generalSettings.getGeneralSettings();
+    if(!generalSettings) {
+      throw new BadRequestException('No se encontraron configuraciones generales.');
+    }
+    const minAdvanceHours = generalSettings.minAdvanceHours;
+    if(date < this._time.addHours(new Date(), minAdvanceHours)) {
+      throw new BadRequestException(`No se puede reservar menos de ${minAdvanceHours} horas antes de la fecha actual.`);
+    }
+  }
 
   async validateAppointmentAvailability(
     request: AppointmentForCreationDto,

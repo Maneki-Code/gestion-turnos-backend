@@ -69,7 +69,8 @@ export class AppointmentsService {
   async create(request: AppointmentForCreationDto): Promise<AppointmentResponse> {
     const offeredService = await this._offeredService.findById(request.serviceId);
     const appointmentDate = this._time.convertStringToDate(request.date);
-  
+    
+    await this._appointmentValidation.validateLimitDaysToReserve(appointmentDate);
     await this._appointmentValidation.validateAppointmentTimes(request);
     await this._appointmentValidation.validateAppointmentAvailability(request, appointmentDate);
     await this._appointmentValidation.validateAppointmentDateIsNotOnHoliday(request.scheduleId, appointmentDate);
