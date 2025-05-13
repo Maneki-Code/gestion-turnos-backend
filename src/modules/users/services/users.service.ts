@@ -15,6 +15,7 @@ import { UserOfferedServicesDto } from '../dtos/userOfferedServicesDto.dto';
 
 @Injectable()
 export class UsersService {
+
   constructor(
     private readonly _prisma: PrismaService,
     private readonly _schedules: SchedulesService,
@@ -165,4 +166,26 @@ export class UsersService {
     return this._userMapper.userToFullResponse(updatedUser);
   }
   
+  async findAllByServiceId(serviceId: number): Promise<UserResponse[]> {
+    const serviceFound = await this._prisma.offeredService.findUnique({
+      where: { id: serviceId },
+    });
+
+    if (!serviceFound) throw new NotFoundException('Servicio no encontrado.');
+
+    const usersFound = await this._prisma.user.findMany({
+      where: {
+        offeredServices: {
+          some: { id: serviceId },
+        },
+      },
+      include: {
+        offeredServices: true,
+      },
+    });
+
+    if(usersFound.length === 0) throw new NotFoundException('No se encontraron usuarios para el servicio especificado.');
+
+    return usersFound.map((user) => this._userMapper.userToFullResponse(user));
+  }
 }
