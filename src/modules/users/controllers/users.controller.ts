@@ -33,6 +33,12 @@ export class UsersController {
   }
 
   @ApiBearerAuth() 
+  @Get('by-service-id/:serviceId')
+  async findAllByServiceId(@Param('serviceId') serviceId: number): Promise<UserResponse[]>{
+    return await this._userServices.findAllByServiceId(serviceId);
+  }
+
+  @ApiBearerAuth() 
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
