@@ -151,3 +151,12 @@ model OfferedService {
 
   @@map("OfferedServices")
 }
+
+model GeneralSettings {
+  id Int @id 
+  limitDaysToReserve Int
+  minAdvanceHours Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("GeneralSettings")
+}
