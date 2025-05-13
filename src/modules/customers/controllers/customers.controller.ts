@@ -54,6 +54,16 @@ export class CustomersController {
     );
   }
 
+  @Get('find-by-phone-number')
+  async findOneByPhoneNumber(
+    @Query('phoneNumber') phoneNumber: string
+  ): Promise<CustomerResponse> {
+  
+    return await this._customerService.findOneByPhoneNumber(
+      phoneNumber.trim(),
+    );
+  }
+
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN', 'MANAGER')
   @Patch()
