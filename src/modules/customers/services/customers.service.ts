@@ -92,6 +92,18 @@ export class CustomersService {
       limit: take
     }
   }
+  
+  async findOneByPhoneNumber(phoneNumber: string): Promise<CustomerResponse> {
+    const foundCustomer = await this._prisma.customer.findUnique({
+      where:{
+        phoneNumber: phoneNumber
+      }
+    })
+
+    if(!foundCustomer) throw new NotFoundException(`No se encontró el cliente`);
+
+    return this._customerMapper.customerToFullResponse(foundCustomer);
+  }
 
   async updateCustomer(request: CustomerForUpdateDto):Promise<void>{
     const customerFound = await this._prisma.customer.findUnique({
