@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsEmail } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 export class GeneralSettingsForUpdateDto {
   @ApiProperty({
@@ -7,16 +7,30 @@ export class GeneralSettingsForUpdateDto {
     required: false,
   })
   @IsInt()
-  @IsNotEmpty()
+  @IsOptional()
   limitDaysToReserve?: number;
   @ApiProperty({
-    description: 'Mínimo de horas de anticipación',
-    example: 24,
+    description: 'Dirección de la empresa',
+    example: 'Calle 123, Ciudad, País',
     required: false,
   })
-  @IsInt()
-  @IsNotEmpty()
-  minAdvanceHours?: number;
+  @IsString()
+  @IsOptional()
+  address?: string;
+  @ApiProperty({
+    description: 'Número de teléfono de la empresa',
+    example: '+54 9 11 3333-3333',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
+  @ApiProperty({
+    description: 'Correo electrónico de la empresa',
+    example: 'info@empresa.com',
+    required: false,
+  })
+  @IsEmail()
+  @IsOptional()
+  email?: string;
 }
-
-	

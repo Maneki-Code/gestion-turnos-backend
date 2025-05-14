@@ -1,5 +1,7 @@
 export class GeneralSettingsResponse {
   limitDaysToReserve: number;
-  minAdvanceHours: number;
+  address: string;
+  phoneNumber: string;
+  email: string;
 }
 

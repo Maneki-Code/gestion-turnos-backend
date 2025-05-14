@@ -15,13 +15,17 @@ export class GeneralSettingsService {
     if (!generalSettings) {
       return await this.updateGeneralSettings({
         limitDaysToReserve: 30,
-        minAdvanceHours: 8,
+        address: 'info@empresa.com',
+        phoneNumber: '+54 9 11 3333-3333',
+        email: 'info@empresa.com',
       });
     }
 
     return {
       limitDaysToReserve: generalSettings.limitDaysToReserve,
-      minAdvanceHours: generalSettings.minAdvanceHours,
+      address: generalSettings.address ?? '',
+      phoneNumber: generalSettings.phoneNumber ?? '',
+      email: generalSettings.email ?? '',
     };
   }
 
@@ -32,18 +36,24 @@ export class GeneralSettingsService {
       where: { id: 1 },
       update: {
         limitDaysToReserve: generalSettings.limitDaysToReserve ?? undefined,
-        minAdvanceHours: generalSettings.minAdvanceHours ?? undefined,
+        address: generalSettings.address ?? undefined,
+        phoneNumber: generalSettings.phoneNumber ?? undefined,
+        email: generalSettings.email ?? undefined,
       },
       create: {
         id: 1,
         limitDaysToReserve: generalSettings.limitDaysToReserve ?? 30, 
-        minAdvanceHours: generalSettings.minAdvanceHours ?? 8,
+        address: generalSettings.address ?? undefined,
+        phoneNumber: generalSettings.phoneNumber ?? undefined,
+        email: generalSettings.email ?? undefined,
       },
     });
   
     return {
       limitDaysToReserve: updatedGeneralSettings.limitDaysToReserve,
-      minAdvanceHours: updatedGeneralSettings.minAdvanceHours,
+      address: updatedGeneralSettings.address ?? '',
+      phoneNumber: updatedGeneralSettings.phoneNumber ?? '',
+      email: updatedGeneralSettings.email ?? '',
     };
   }
 }

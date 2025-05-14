@@ -7,7 +7,6 @@ import { TimeService } from 'src/common/time/time.service';
 import { AppointmentValidationService } from 'src/common/validations/services/appointment-validation.service';
 import { AppointmentResponse } from '../dtos/appointment.response';
 import { AppointmentMapperService } from 'src/common/mappers/services/appointment-mapper.service';
-import { NotFoundError } from 'rxjs';
 import { OfferedServicesService } from 'src/modules/offered-services/services/offered-services.service';
 
 @Injectable()

@@ -25,17 +25,6 @@ export class AppointmentValidationService {
     }
   }
 
-  async validateMinAdvanceHours(date: DateTime){
-    const generalSettings = await this._generalSettings.getGeneralSettings();
-    if(!generalSettings) {
-      throw new BadRequestException('No se encontraron configuraciones generales.');
-    }
-    const minAdvanceHours = generalSettings.minAdvanceHours;
-    if(date < this._time.addHours(new Date(), minAdvanceHours)) {
-      throw new BadRequestException(`No se puede reservar menos de ${minAdvanceHours} horas antes de la fecha actual.`);
-    }
-  }
-
   async validateAppointmentAvailability(
     request: AppointmentForCreationDto,
     date: DateTime,
