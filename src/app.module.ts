@@ -13,6 +13,8 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { ValidationsModule } from './common/validations/validations.module';
 import { MappersModule } from './common/mappers/mappers.module';
 import { OfferedServicesModule } from './modules/offered-services/offered-services.module';
+import { GeneralSettingsService } from './modules/general-settings/services/general-settings.service';
+import { GeneralSettingsModule } from './modules/general-settings/general-settings.module';
 
 @Module({
   imports: [
@@ -28,8 +30,9 @@ import { OfferedServicesModule } from './modules/offered-services/offered-servic
     CustomersModule,
     ValidationsModule,
     MappersModule,
-    OfferedServicesModule],
-  providers: [PrismaService, TimeService],
+    OfferedServicesModule,
+    GeneralSettingsModule],
+  providers: [PrismaService, TimeService, GeneralSettingsService],
   exports: [PrismaService, TimeService]
 })
 export class AppModule {

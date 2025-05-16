@@ -71,6 +71,7 @@ export class AuthController {
     await this.authService.logout(response);
   }
 
+  
   @Get('me')
   async me(@Req() req: Request, @Res() res: Response) {
     const token = req.cookies?.Authentication;
@@ -88,7 +89,7 @@ export class AuthController {
         lastName: decoded.lastName,
       });
     } catch (error) {
-      throw new UnauthorizedException('Token inválido o expirado');
+      throw new UnauthorizedException('Por favor, inicie sesión nuevamente');
     }
   }
   

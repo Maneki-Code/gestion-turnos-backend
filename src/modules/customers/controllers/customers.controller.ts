@@ -58,7 +58,6 @@ export class CustomersController {
   async findOneByPhoneNumber(
     @Query('phoneNumber') phoneNumber: string
   ): Promise<CustomerResponse> {
-  
     return await this._customerService.findOneByPhoneNumber(
       phoneNumber.trim(),
     );

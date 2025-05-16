@@ -7,7 +7,6 @@ import { TimeService } from 'src/common/time/time.service';
 import { AppointmentValidationService } from 'src/common/validations/services/appointment-validation.service';
 import { AppointmentResponse } from '../dtos/appointment.response';
 import { AppointmentMapperService } from 'src/common/mappers/services/appointment-mapper.service';
-import { NotFoundError } from 'rxjs';
 import { OfferedServicesService } from 'src/modules/offered-services/services/offered-services.service';
 
 @Injectable()
@@ -69,7 +68,8 @@ export class AppointmentsService {
   async create(request: AppointmentForCreationDto): Promise<AppointmentResponse> {
     const offeredService = await this._offeredService.findById(request.serviceId);
     const appointmentDate = this._time.convertStringToDate(request.date);
-  
+    
+    await this._appointmentValidation.validateLimitDaysToReserve(appointmentDate);
     await this._appointmentValidation.validateAppointmentTimes(request);
     await this._appointmentValidation.validateAppointmentAvailability(request, appointmentDate);
     await this._appointmentValidation.validateAppointmentDateIsNotOnHoliday(request.scheduleId, appointmentDate);

@@ -4,6 +4,17 @@ import { DateTime } from 'luxon'; // Importamos Luxon
 
 @Injectable()
 export class TimeService {
+  addDays(arg0: Date, maxDaysToReserve: any) {
+    const date = new Date(arg0);
+    date.setDate(date.getDate() + maxDaysToReserve);
+    return date;
+  }
+  addHours(arg0: Date, minAdvanceHours: any) {
+    const date = new Date(arg0);
+    date.setHours(date.getHours() + minAdvanceHours);
+    return date;
+  }
+
   timeToMinutes(time: string): number {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
@@ -13,16 +24,24 @@ export class TimeService {
     const dt = date instanceof DateTime ? date : DateTime.fromJSDate(date);
     const utcDate = dt.setZone('utc');
     const dayOfWeek = utcDate.weekday;
-  
+
     switch (dayOfWeek) {
-      case 1: return EDayOfWeek.LUNES;
-      case 2: return EDayOfWeek.MARTES;
-      case 3: return EDayOfWeek.MIÉRCOLES;
-      case 4: return EDayOfWeek.JUEVES;
-      case 5: return EDayOfWeek.VIERNES;
-      case 6: return EDayOfWeek.SÁBADO;
-      case 7: return EDayOfWeek.DOMINGO;
-      default: throw new Error('Invalid day of the week');
+      case 1:
+        return EDayOfWeek.LUNES;
+      case 2:
+        return EDayOfWeek.MARTES;
+      case 3:
+        return EDayOfWeek.MIÉRCOLES;
+      case 4:
+        return EDayOfWeek.JUEVES;
+      case 5:
+        return EDayOfWeek.VIERNES;
+      case 6:
+        return EDayOfWeek.SÁBADO;
+      case 7:
+        return EDayOfWeek.DOMINGO;
+      default:
+        throw new Error('Invalid day of the week');
     }
   }
 
@@ -30,12 +49,16 @@ export class TimeService {
   convertTimeToLuxonDate(time: string): DateTime {
     const isValidTime = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/.test(time);
     if (!isValidTime) {
-      throw new BadRequestException('El formato de hora no es válido. Debe ser HH:mm');
+      throw new BadRequestException(
+        'El formato de hora no es válido. Debe ser HH:mm',
+      );
     }
-    
+
     const [hours, minutes] = time.split(':').map(Number);
-    
-    return DateTime.fromObject({ hour: hours, minute: minutes }).setZone('America/Argentina/Buenos_Aires');
+
+    return DateTime.fromObject({ hour: hours, minute: minutes }).setZone(
+      'America/Argentina/Buenos_Aires',
+    );
   }
 
   convertStringToDate(date: string): DateTime {
