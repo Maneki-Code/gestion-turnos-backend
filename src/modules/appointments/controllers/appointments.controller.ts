@@ -11,8 +11,6 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 export class AppointmentsController {
   constructor(private readonly _appointment: AppointmentsService) {}
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN', 'MANAGER')
   @Post()
   async create(@Body() request: AppointmentForCreationDto) {
     return await this._appointment.create(request);
@@ -25,8 +23,7 @@ export class AppointmentsController {
     return await this._appointment.createBulk(request);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN', 'MANAGER')
+
   @Get('between-dates')
   async findAllBetweenDates(
     @Query('id') id: number,

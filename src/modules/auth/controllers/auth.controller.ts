@@ -81,7 +81,12 @@ export class AuthController {
   
     try {
       const decoded = this.jwtService.verify(token); 
-      return res.json({ id: decoded.sub, email: decoded.email, role: decoded.role, name: decoded.name });
+      return res.json({
+        email: decoded.email, 
+        role: decoded.role, 
+        firstName: decoded.firstName, 
+        lastName: decoded.lastName,
+      });
     } catch (error) {
       throw new UnauthorizedException('Token inválido o expirado');
     }
