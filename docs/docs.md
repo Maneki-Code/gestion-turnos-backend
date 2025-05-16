@@ -31,24 +31,34 @@ src/
 2. **Users Module**
    - Gestión de usuarios del sistema
    - Roles: ADMIN y MANAGER
+   - Asociación con servicios ofrecidos
 
 3. **Appointments Module**
    - Gestión de citas y turnos
    - Estados: RESERVADO, TERMINADO, AUSENTE
+   - Asociación con clientes y horarios
 
 4. **Schedules Module**
    - Configuración de horarios
    - Gestión de días laborables
    - Configuración de descansos
    - Gestión de días festivos
+   - Intervalos de tiempo configurables
 
 5. **Customers Module**
    - Gestión de clientes
    - Información de contacto
+   - Historial de citas
 
 6. **Offered Services Module**
    - Catálogo de servicios ofrecidos
    - Precios y descripciones
+   - Asociación con usuarios (profesionales)
+
+7. **General Settings Module**
+   - Configuración global del sistema
+   - Límite de días para reservas
+   - Información de contacto del negocio
 
 ## Modelo de Datos
 
@@ -58,33 +68,56 @@ src/
 - Gestión de usuarios del sistema
 - Campos principales: id, firstName, lastName, email, password, role
 - Roles: ADMIN, MANAGER
+- Relación con servicios ofrecidos y horarios
 
 #### Schedule
 - Configuración de horarios por usuario
 - Relaciones con ScheduleDayConfig y ScheduleHoliday
 - Gestión de citas asociadas
+- Configuración de días laborables y festivos
 
 #### ScheduleDayConfig
 - Configuración diaria de horarios
 - Días de la semana (LUNES a DOMINGO)
 - Horarios de inicio y fin
-- Intervalos de tiempo
+- Intervalos de tiempo configurables
+- Estado activo/inactivo
 - Configuración de descansos
+
+#### ScheduleDayRestConfig
+- Configuración de descansos diarios
+- Horarios de inicio y fin de descanso
+- Relación con ScheduleDayConfig
+
+#### ScheduleHoliday
+- Gestión de días festivos
+- Períodos de inactividad
+- Razón del festivo
 
 #### Appointment
 - Gestión de citas
 - Estados: RESERVADO, TERMINADO, AUSENTE
 - Relación con clientes y horarios
-- Información del servicio
+- Información del servicio (título, precio, descripción)
+- Fecha y horario específico
 
 #### Customer
 - Información de clientes
 - Campos: firstName, lastName, phoneNumber, email
 - Relación con citas
+- Historial de servicios
 
 #### OfferedService
 - Catálogo de servicios
 - Campos: title, description, price
+- Relación con usuarios (profesionales)
+- Precios configurables
+
+#### GeneralSettings
+- Configuración global del sistema
+- Límite de días para reservas
+- Información de contacto del negocio
+- Configuración única por sistema
 
 ## API Endpoints
 
@@ -107,6 +140,10 @@ La API está documentada con Swagger y puede ser accedida en la ruta `/api` cuan
 - GET `/schedules/:id` - Obtener horario
 - PUT `/schedules/:id` - Actualizar horario
 - DELETE `/schedules/:id` - Eliminar horario
+- GET `/schedules/:id/days` - Obtener configuración de días
+- POST `/schedules/:id/days` - Configurar día
+- GET `/schedules/:id/holidays` - Obtener días festivos
+- POST `/schedules/:id/holidays` - Agregar día festivo
 
 ### Citas
 - GET `/appointments` - Listar citas
@@ -114,6 +151,26 @@ La API está documentada con Swagger y puede ser accedida en la ruta `/api` cuan
 - GET `/appointments/:id` - Obtener cita
 - PUT `/appointments/:id` - Actualizar cita
 - DELETE `/appointments/:id` - Eliminar cita
+- PUT `/appointments/:id/status` - Actualizar estado de cita
+
+### Clientes
+- GET `/customers` - Listar clientes
+- POST `/customers` - Crear cliente
+- GET `/customers/:id` - Obtener cliente
+- PUT `/customers/:id` - Actualizar cliente
+- DELETE `/customers/:id` - Eliminar cliente
+- GET `/customers/:id/appointments` - Obtener citas del cliente
+
+### Servicios
+- GET `/services` - Listar servicios
+- POST `/services` - Crear servicio
+- GET `/services/:id` - Obtener servicio
+- PUT `/services/:id` - Actualizar servicio
+- DELETE `/services/:id` - Eliminar servicio
+
+### Configuración General
+- GET `/settings` - Obtener configuración
+- PUT `/settings` - Actualizar configuración
 
 ## Configuración del Entorno
 
@@ -134,12 +191,14 @@ La API está documentada con Swagger y puede ser accedida en la ruta `/api` cuan
 - Encriptación de contraseñas con bcrypt
 - Validación de datos con class-validator
 - Protección de rutas basada en roles
+- Validación de permisos por módulo
 
 ## Base de Datos
 - MySQL como motor de base de datos
 - Prisma como ORM
 - Migraciones automáticas
 - Relaciones y restricciones de integridad referencial
+- Índices optimizados para consultas frecuentes
 
 ## Consideraciones de Desarrollo
 - Código modular y mantenible
@@ -147,6 +206,7 @@ La API está documentada con Swagger y puede ser accedida en la ruta `/api` cuan
 - Validación de datos
 - Manejo de errores centralizado
 - Documentación de API con Swagger
+- Control de versiones con Git
 
 ## Despliegue
 1. Configurar variables de entorno
@@ -158,4 +218,6 @@ La API está documentada con Swagger y puede ser accedida en la ruta `/api` cuan
 - Monitoreo de logs
 - Backups regulares de la base de datos
 - Actualizaciones de dependencias
-- Revisión de seguridad periódica 
+- Revisión de seguridad periódica
+- Optimización de consultas
+- Monitoreo de rendimiento 

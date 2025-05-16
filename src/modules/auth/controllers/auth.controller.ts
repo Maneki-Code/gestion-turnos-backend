@@ -71,6 +71,7 @@ export class AuthController {
     await this.authService.logout(response);
   }
 
+  
   @Get('me')
   async me(@Req() req: Request, @Res() res: Response) {
     const token = req.cookies?.Authentication;

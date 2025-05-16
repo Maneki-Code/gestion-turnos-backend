@@ -178,9 +178,23 @@ export class UsersService {
         offeredServices: {
           some: { id: serviceId },
         },
+        schedule:{
+          scheduleDays:{
+            some:{
+              status: true
+            }
+          }
+        }
       },
       include: {
         offeredServices: true,
+        schedule: {
+          include: {
+            scheduleDays: {
+              where: { status: true }, 
+            },
+          },
+        },
       },
     });
 
