@@ -38,6 +38,7 @@ export class AuthService {
         message: 'Login successful',
         user: {
           name: `${user.firstName} ${user.lastName}`,
+          role: user.role,
           email: user.email,
         }
       });
@@ -125,6 +126,9 @@ export class AuthService {
   generateToken(user: User): string {
     const payload = {
       email: user.email,
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
     };
 
