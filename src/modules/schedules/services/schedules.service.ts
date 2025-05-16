@@ -10,6 +10,7 @@ import { EDayOfWeek } from '@prisma/client';
 import { ScheduleResponse } from '../dtos/schedule.response';
 import { ScheduleMapperService } from 'src/common/mappers/services/schedule-mapper.service';
 import { ScheduleDayConfigResponse } from '../dtos/scheduleDayConfig.response';
+import { TimeService } from 'src/common/time/time.service';
 
 @Injectable()
 export class SchedulesService {
@@ -17,6 +18,7 @@ export class SchedulesService {
     private readonly _prisma: PrismaService,
     private readonly _schedulesDayConfig: ScheduleDayConfigService,
     private readonly _mapper: ScheduleMapperService,
+    private readonly _time: TimeService
   ) {}
 
   async create(userId: number): Promise<void> {
@@ -76,6 +78,52 @@ export class SchedulesService {
       schedule.scheduleDays,
       schedule.scheduleHolidays,
     );
+  }
+
+  async findAvailabilityHoursByDateAndScheduleId(scheduleId: number, date: string): Promise<string[]> {
+    console.log('scheduleId recibido:', scheduleId);
+    console.log('date recibido:', date);
+    const foundSchedule = await this._prisma.schedule.findUnique({
+      where: {
+        id: scheduleId
+      },
+      include: {
+        scheduleDays:{
+          include: {
+            rests: true,
+          },
+        },
+        appointments: true,
+      },
+    });
+
+    if (!foundSchedule)
+      throw new NotFoundException(`Agenda no encontrada para el id ${scheduleId}`);
+
+    const foundAppointments = foundSchedule.appointments.filter(appointment => appointment.date.toISOString().split('T')[0] === date);
+
+    const dayOfWeek = this._time.getDayOfWeek(new Date(date));
+    const dayConfig = foundSchedule.scheduleDays.find(day => day.day === dayOfWeek);
+
+    if (!dayConfig)
+      throw new NotFoundException(`Configuración de día no encontrada para el día ${dayOfWeek}`);
+
+    const startTime = dayConfig.startTime;
+    const endTime = dayConfig.endTime;
+    const slotInterval = dayConfig.slotInterval;
+
+    const availableHours: string[] = [];
+
+    const startTimeMinutes = this._time.timeToMinutes(startTime);
+    const endTimeMinutes = this._time.timeToMinutes(endTime);
+    for (let hour = startTimeMinutes; hour < endTimeMinutes; hour += slotInterval) {
+      const hourString = this._time.minutesToTime(hour);
+      if (!foundAppointments.some(appointment => appointment.startTime === hourString) && dayConfig.rests.every(rest => rest.startTime !== hourString)) {
+        availableHours.push(hourString);
+      }
+    }
+
+    return availableHours;
   }
 
   async findByEmailFullResponse(email: string): Promise<ScheduleResponse> {

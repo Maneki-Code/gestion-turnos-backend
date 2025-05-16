@@ -20,28 +20,19 @@ import { ScheduleConfigResponse } from '../dtos/scheduleconfig.response';
 export class SchedulesController {
   constructor(private _scheduleService: SchedulesService) { }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN', 'MANAGER')
-  @Get('/:email')
-  async findByEmailFullResponse(@Param('email') email: string) {
-    return await this._scheduleService.findByEmailFullResponse(email);
+  @Get('/findAvailabilityHours')
+  async findAvailabilityHoursByDateAndScheduleId(
+    @Query('scheduleId') scheduleId: number,
+    @Query('date') date: string,
+  ): Promise<string[]> {
+    return await this._scheduleService.findAvailabilityHoursByDateAndScheduleId(scheduleId, date);
   }
 
-  /* @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN', 'MANAGER') */
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MANAGER')
   @Get('/config/:email')
   async findByEmailConfigResponse(@Param('email') email: string) {
     return await this._scheduleService.findByEmailConfigResponse(email);
-  }
-
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN', 'MANAGER')
-  @Patch('update-config')
-  async updateScheduleConfig(
-    @Body() request: ScheduleForUpdateDto,
-  ): Promise<ScheduleConfigResponse> {
-    
-    return await this._scheduleService.updateConfig(request);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -52,6 +43,22 @@ export class SchedulesController {
     @Query('months') months: number,
   ) {
     return await this._scheduleService.getStatsByHour(email, months);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MANAGER')
+  @Patch('update-config')
+  async updateScheduleConfig(
+    @Body() request: ScheduleForUpdateDto,
+  ): Promise<ScheduleConfigResponse> {
+    return await this._scheduleService.updateConfig(request);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MANAGER')
+  @Get('/:email')
+  async findByEmailFullResponse(@Param('email') email: string) {
+    return await this._scheduleService.findByEmailFullResponse(email);
   }
 
   
