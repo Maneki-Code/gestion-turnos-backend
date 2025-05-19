@@ -25,6 +25,14 @@ export class OfferedServicesController {
     return await this._offeredServicesService.findAll();
   }
 
+  
+  @Get('user-active')
+  async findAllByUserActive():Promise<OfferedServiceResponse[]> {
+    return await this._offeredServicesService.findAllByUserActive();
+  }
+
+
+
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch()
