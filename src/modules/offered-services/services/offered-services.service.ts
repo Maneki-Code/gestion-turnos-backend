@@ -51,7 +51,25 @@ export class OfferedServicesService {
 
   async findAll(): Promise<OfferedServiceResponse[]> {
     const services = await this._prisma.offeredService.findMany();
+    return services.map((offeredService) =>
+      this._mapper.offeredServiceToResponse(offeredService),
+    );
+  }
 
+  async findAllByUserActive(): Promise<OfferedServiceResponse[]> {
+    const services = await this._prisma.offeredService.findMany({
+      where: {
+        users: {
+          some: {
+            schedule: {
+              scheduleDays: {
+                some: { status: true },
+              },
+            },
+          },
+        },
+      },
+    });
     return services.map((offeredService) =>
       this._mapper.offeredServiceToResponse(offeredService),
     );

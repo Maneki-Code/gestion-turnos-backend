@@ -28,8 +28,6 @@ export class SchedulesController {
     return await this._scheduleService.findAvailabilityHoursByDateAndScheduleId(scheduleId, date);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN', 'MANAGER')
   @Get('/config/:email')
   async findByEmailConfigResponse(@Param('email') email: string) {
     return await this._scheduleService.findByEmailConfigResponse(email);
@@ -54,12 +52,8 @@ export class SchedulesController {
     return await this._scheduleService.updateConfig(request);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN', 'MANAGER')
   @Get('/:email')
   async findByEmailFullResponse(@Param('email') email: string) {
     return await this._scheduleService.findByEmailFullResponse(email);
   }
-
-  
 }
